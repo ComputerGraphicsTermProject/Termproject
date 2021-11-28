@@ -7,6 +7,7 @@ GLuint VAO[3], VBO_pos[3], VBO_normal[3], VBO_color[3];
 //------------------------------------
 glm::mat4 CubeModel = glm::mat4(1.0f);
 glm::mat4 MiroModel = glm::mat4(1.0f);
+glm::mat4 MiroModel2 = glm::mat4(1.0f);
 glm::mat4 projection = glm::mat4(1.0f);
 glm::mat4 camera = glm::mat4(1.0f);
 glm::mat4 view = glm::mat4(1.0f);
@@ -14,11 +15,24 @@ glm::mat4 view = glm::mat4(1.0f);
 
 float cx = 0.0;
 float cy = 0.7;
-float cz = 0.2;
+float cz = 0.3;
 
 float c2x = 0.0;
 float c2y = 0.0;
 float c2z = 0.0;
+
+float Angle = 0.0f;
+
+unsigned int modelLocation;
+unsigned int projectionLocation;
+unsigned int viewLocation;
+unsigned int colorLocation;  //모델의 색상  
+
+unsigned int lightColorLocation;
+unsigned int lightPosLocation;
+unsigned int ViewPosLocation;
+unsigned int objColorLocation;
+unsigned int normalLocation;
 
 glm::vec3 cameraPos = glm::vec3(cx, cy, cz);
 glm::vec3 cameraDirection = glm::vec3(c2x, c2y, c2z);
@@ -28,6 +42,7 @@ GLfloat lightR = 1.0, lightG = 1.0, lightB = 1.0;
 GLfloat BoxX = 1.5, BoxY = 1.5, BoxZ = 1.0;
 //------------------------------------ 
 glm::mat4 TR = glm::mat4(1.0f);
+glm::mat4 TS = glm::mat4(1.0f);
 //----------------------------------------------
 struct loca {
     //큐브가 이동할 위치 
@@ -53,7 +68,50 @@ struct loca {
     float uz{};
 };
 loca** MDataArr = nullptr;
-loca** MDataArr2 = nullptr; 
+loca** MDataArr2 = nullptr;
+//-------------------------------------------------
+GLuint Stage1[20][20] = { 0,1,1,1,1,1,0,0,0,1,0,1,1,0,1,0,1,0,0,0,
+                          0,1,1,1,1,1,0,0,0,0,0,1,1,0,1,0,1,0,1,0,
+                          0,1,0,1,0,1,1,1,0,1,0,0,0,0,1,0,1,0,1,0,
+                          0,1,0,1,0,1,0,1,0,1,0,1,1,0,1,0,0,0,1,0,
+                          0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,1,0,
+                          1,1,0,1,0,0,0,1,0,1,0,1,1,1,1,0,1,0,1,0,
+                          0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,0,1,0,1,1,
+                          1,1,1,1,1,1,1,1,1,1,0,1,0,1,1,1,1,0,0,0,
+                          0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,
+                          0,0,0,1,1,1,1,1,1,1,1,1,0,1,0,0,1,1,1,1,
+                          1,1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1,0,0,0,
+                          0,0,0,1,0,0,0,0,1,0,0,1,0,1,0,0,1,1,1,0,
+                          1,0,1,1,1,1,1,1,1,0,0,1,0,1,0,0,0,0,1,0,
+                          0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,1,0,
+                          1,1,0,1,0,0,1,0,0,1,0,1,0,0,0,1,0,0,1,0,
+                          0,1,1,1,0,0,1,0,0,1,0,1,0,1,1,1,0,1,1,0,
+                          0,0,0,0,0,1,1,1,0,1,0,1,0,1,0,1,0,0,0,0,
+                          0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
+                          1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,1,1,
+                          0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0 };
+
+GLuint Stage2[20][20] = { 0,0,1,0,0,0,0,0,0,1,0,1,0,1,0,1,1,0,1,0,
+                          1,0,1,0,1,0,1,0,0,0,0,1,0,1,0,1,0,0,0,0,
+                          1,0,1,1,1,0,1,1,1,1,0,1,0,1,0,1,0,1,0,1,
+                          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                          1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0,
+                          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,
+                          1,1,1,0,0,0,0,0,1,0,1,0,1,0,1,0,1,0,1,0,
+                          0,0,0,0,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,0,
+                          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                          1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,
+                          0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,
+                          0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,
+                          0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,1,0,0,
+                          0,0,0,0,0,0,0,0,0,1,0,1,1,1,1,1,1,1,1,0,
+                          0,1,1,1,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,
+                          0,0,1,0,0,0,0,0,0,1,1,0,1,1,1,0,1,1,1,1,
+                          0,0,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,
+                          1,1,1,0,1,0,0,1,1,1,1,1,1,1,1,1,1,0,1,0,
+                          0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                          1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0 };
+// 타일맵 배치로 변경
 //-------------------------------------------------
 GLvoid InitBuffer() {
     num_Triangle = obj.loadObj("Cube.obj");
@@ -75,22 +133,31 @@ GLvoid InitBuffer() {
     glEnableVertexAttribArray(1);
 }
 
+
+
+
+
 void UserFunc() {
     int w = 20;
     int h = 20;
 
     MDataArr = new loca * [h];
+    MDataArr2 = new loca * [h];
+
     for (int i = 0; i < h; i++) {
         MDataArr[i] = new loca[w];
+    }
+    for (int i = 0; i < h; i++) {
+        MDataArr2[i] = new loca[w];
     }
 
     srand((unsigned int)time(NULL));
     for (int i = 0; i < 20; i++) {
-        for (int p = 0; p < 20; p++) { 
-            MDataArr[i][p].is = 0;  
+        for (int p = 0; p < 20; p++) {
+            MDataArr[i][p].is = 0;
             //크기 스케일  
             MDataArr[i][p].sx = 1.0 / 20;
-            MDataArr[i][p].sy = 0.3; 
+            MDataArr[i][p].sy = 0.3;
             MDataArr[i][p].sz = 1.0 / 20;
 
             //위치 이동하기  
@@ -113,145 +180,37 @@ void UserFunc() {
             if (MDataArr[i][p].dz + (1.0 / h) == 0) {
                 MDataArr[i][p].uz = 0;
             }
+            //--------------------------------------------------------------------
+
+            MDataArr2[i][p].is = 0;
+            //크기 스케일  
+            MDataArr2[i][p].sx = 1.0 / 20;
+            MDataArr2[i][p].sy = 0.3;
+            MDataArr2[i][p].sz = 1.0 / 20;
+
+            //위치 이동하기  
+            MDataArr2[i][p].x = (-0.5 + (1.0 / w) / 2) + ((1.0 / w) * p);
+            MDataArr2[i][p].y = 0;
+            MDataArr2[i][p].z = (-0.5 + (1.0 / h) / 2) + ((1.0 / h) * i);
+
+            //------------------------------------------------------------- 
+
+
+            //위치 계산하기 
+            MDataArr2[i][p].lx = (-0.5 + ((1.0 / 20) * p)); //왼     
+            MDataArr2[i][p].rx = (-0.5 + ((1.0 / 20) * p)) + (1.0 / 20); //오    
+            MDataArr2[i][p].uz = (-0.5 + ((1.0 / 20) * i)) + (1.0 / 20); //양의 방향쪽 z      
+            MDataArr2[i][p].dz = (-0.5 + ((1.0 / 20) * i)); //음의 방향쪽 z   
+
+            if (MDataArr2[i][p].lx + (1.0 / w) == 0) {
+                MDataArr2[i][p].rx = 0;
+            }
+            if (MDataArr2[i][p].dz + (1.0 / h) == 0) {
+                MDataArr2[i][p].uz = 0;
+            }
+
         }
     }
-} 
-void MakeMiro() {
-    for (int i = 1; i < 6; ++i)
-        MDataArr[0][i].is = 1;
-    MDataArr[0][9].is = 1;
-    MDataArr[0][11].is = 1;
-    MDataArr[0][12].is = 1;
-    MDataArr[0][14].is = 1;
-    MDataArr[0][16].is = 1;
-
-    MDataArr[1][1].is = 1;
-    MDataArr[1][3].is = 1;
-    MDataArr[1][5].is = 1;
-    MDataArr[1][11].is = 1;
-    for(int i = 12; i<= 18; i+=2)
-        MDataArr[1][i].is = 1; 
-
-    for (int i = 1; i <= 7; i += 2) {
-        MDataArr[2][i].is = 1;
-    }
-    MDataArr[2][6].is = 1;
-    MDataArr[2][14].is = 1;
-    MDataArr[2][16].is = 1;
-    MDataArr[2][18].is = 1;
-
-    for (int i = 3; i < 13; i += 2) {
-        MDataArr[3][i].is = 1;
-    }
-    MDataArr[3][12].is = 1;
-    MDataArr[3][14].is = 1;
-    MDataArr[3][18].is = 1;
-
-    MDataArr[4][0].is = 1;
-    MDataArr[4][1].is = 1;
-    MDataArr[4][5].is = 1;
-    MDataArr[4][9].is = 1;
-    MDataArr[4][11].is = 1;
-    MDataArr[4][18].is = 1;
-
-    for (int i = 1; i <= 13; i += 2) { 
-        MDataArr[5][i].is = 1;
-    }
-    MDataArr[5][5].is = 0;
-    for (int i = 12; i <= 18; i += 2) { 
-        MDataArr[5][i].is = 1;
-    }
-
-    for(int i = 1; i<=9; i+=2)
-        MDataArr[6][i].is = 1; 
-    MDataArr[6][5].is = 0;
-    MDataArr[6][16].is = 1;
-    MDataArr[6][18].is = 1;
-    MDataArr[6][19].is = 1;
-
-    for (int i = 0; i <= 16; ++i) {
-        MDataArr[7][i].is = 1;
-    }
-    MDataArr[7][10].is = 0;
-    MDataArr[7][12].is = 0;
-
-    MDataArr[8][11].is = 1;
-    MDataArr[8][13].is = 1;
-
-    for (int i = 3; i <= 19; ++i) {
-        MDataArr[9][i].is = 1;
-    }
-    MDataArr[9][12].is = 0;
-    MDataArr[9][14].is = 0;
-    MDataArr[9][15].is = 0;
-
-    MDataArr[10][0].is = 1;
-    MDataArr[10][1].is = 1; 
-    MDataArr[10][6].is = 1;
-    MDataArr[10][11].is = 1;
-    MDataArr[10][16].is = 1;
-
-    MDataArr[11][3].is = 1;
-    MDataArr[11][8].is = 1;
-    MDataArr[11][11].is = 1;
-    MDataArr[11][13].is = 1;
-    MDataArr[11][16].is = 1;
-    MDataArr[11][17].is = 1;
-    MDataArr[11][18].is = 1;
-
-    for (int i = 0; i <= 8; ++i)
-        MDataArr[12][i].is = 1;
-    MDataArr[12][1].is = 0; 
-    MDataArr[12][11].is = 1;
-    MDataArr[12][13].is = 1;
-    MDataArr[12][18].is = 1;
-
-    MDataArr[13][3].is = 1;
-    MDataArr[13][13].is = 1;
-    MDataArr[13][15].is = 1;
-    MDataArr[13][18].is = 1;
-
-    MDataArr[14][0].is = 1;
-    MDataArr[14][1].is = 1;
-    MDataArr[14][3].is = 1;
-    MDataArr[14][6].is = 1;
-    MDataArr[14][9].is = 1;
-    MDataArr[14][11].is = 1;
-    MDataArr[14][15].is = 1;
-    MDataArr[14][18].is = 1;
-
-    for (int i = 1; i <= 18; ++i) {
-        MDataArr[15][i].is = 1; 
-    }
-    MDataArr[15][4].is = 0; 
-    MDataArr[15][5].is = 0;
-    MDataArr[15][7].is = 0;
-    MDataArr[15][8].is = 0;
-    MDataArr[15][10].is = 0;
-    MDataArr[15][12].is = 0;
-    MDataArr[15][16].is = 0;
-  
-
-    MDataArr[16][6].is = 1;
-    for (int i = 5; i <= 15; i += 2) {
-        MDataArr[16][i].is = 1;
-    }
-    MDataArr[17][1].is = 1;
-    MDataArr[17][9].is = 1;
-    MDataArr[17][19].is = 1;
-
-    for (int i = 0; i <= 19; ++i) {
-        MDataArr[18][i].is = 1; 
-    }
-    MDataArr[18][6].is = 0; 
-    MDataArr[18][7].is = 0;
-    MDataArr[18][17].is = 0;
-
-    MDataArr[19][2].is = 1;
-    MDataArr[19][3].is = 1;
-    MDataArr[19][12].is = 1;
-    MDataArr[19][13].is = 1; 
-
 }
 GLvoid InitLight() {
     lightColorLocation = glGetUniformLocation(shaderID, "lightColor");
@@ -287,7 +246,7 @@ GLvoid Mountins(int i, int p) {
     InitLight();
     glUniform3f(objColorLocation, 0.3, 0.3, 0.3);
 
-    MiroModel = glm::mat4(1.0f); 
+    MiroModel = glm::mat4(1.0f);
     MiroModel = glm::translate(MiroModel, glm::vec3(MDataArr[i][p].x, 0.3, MDataArr[i][p].z));
     MiroModel = glm::scale(MiroModel, glm::vec3(MDataArr[i][p].sx, MDataArr[i][p].sy, MDataArr[i][p].sz));
     MiroModel = glm::translate(MiroModel, glm::vec3(0, -0.3, 0));
@@ -295,7 +254,20 @@ GLvoid Mountins(int i, int p) {
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MiroModel));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle);
 }
+GLvoid Mountins2(int i, int p) {
+    glUseProgram(shaderID);
+    glBindVertexArray(VAO[0]);
+    InitLight();
+    glUniform3f(objColorLocation, 0.3, 0.3, 0.3);
 
+    MiroModel2 = glm::mat4(1.0f);
+    MiroModel2 = glm::translate(MiroModel2, glm::vec3(MDataArr2[i][p].x, 0.7, MDataArr2[i][p].z)); // 이 값을 바꿔줌 stage2 바닥의 위치 (2층)
+    MiroModel2 = glm::scale(MiroModel2, glm::vec3(MDataArr2[i][p].sx, MDataArr2[i][p].sy, MDataArr2[i][p].sz));
+    MiroModel2 = glm::translate(MiroModel2, glm::vec3(0, -0.3, 0));
+    modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MiroModel2));
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle);
+}
 GLvoid Floor() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
@@ -308,7 +280,20 @@ GLvoid Floor() {
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle);
 }
+GLvoid Floor2() {
+    glUseProgram(shaderID);
+    glBindVertexArray(VAO[0]);
+    InitLight();
+    glUniform3f(objColorLocation, 0.5, 0.5, 0.5);
 
+    CubeModel = glm::mat4(1.0f);
+    CubeModel = glm::scale(CubeModel, glm::vec3(1, 0.1, 1));
+    CubeModel = glm::translate(CubeModel, glm::vec3(0.0, 4.1, 0)); // y값 4.1로 수정 (2층)
+
+    modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle);
+}
 GLvoid drawScene()
 {
     glClearColor(0, 0, 0, 1.0f);
@@ -320,14 +305,21 @@ GLvoid drawScene()
     View();
 
     Floor();
-    for (int i = 0; i < 20; i++) { 
-        for (int p = 0; p < 20; p++) { 
-            if (MDataArr[i][p].is == 1) {  
-                Mountins(i, p); 
-            } 
+    for (int i = 0; i < 20; i++) {
+        for (int p = 0; p < 20; p++) {
+            if (Stage1[i][p] == 1) {
+                Mountins(i, p);
+            }
         }
     }
-
+    Floor2();
+    for (int i = 0; i < 20; i++) {
+        for (int p = 0; p < 20; p++) {
+            if (Stage2[i][p] == 1) {
+                Mountins2(i, p);
+            }
+        }
+    }
     glutPostRedisplay();
     glutSwapBuffers();
 }
@@ -353,8 +345,8 @@ int main(int argc, char** argv)
     else
         cout << "GLEW Initialized\n";
 
-    UserFunc(); 
-    MakeMiro();  
+    UserFunc();
+    //MakeMiro();
     make_vertexShaders();
     make_fragmentShaders();
 
