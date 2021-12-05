@@ -129,6 +129,7 @@ float RobotY = 0.52;
 GLfloat Robot_X = -0.325;
 GLfloat Robot_Y = 0.52;
 GLfloat Robot_Z = 0.475;
+GLuint Floor_state = 2;
 //------------------------------------------------
 struct BB {
     float minx;
@@ -624,20 +625,37 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         Robot_Z += 0.003;
         RobotDZ += 0.003;
         RobotUZ += 0.003;
-
-        for (int i = 0; i < 20; ++i) {
-            for (int p = 0; p < 20; ++p) {
-                if (Stage2[i][p] == 1) {
-                    if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
-                    {
-                        TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.003));
-                        Robot_Z -= 0.003;
-                        RobotDZ -= 0.003;
-                        RobotUZ -= 0.003;
+        if (Floor_state == 2) {
+            for (int i = 0; i < 20; ++i) {
+                for (int p = 0; p < 20; ++p) {
+                    if (Stage2[i][p] == 1) {
+                        if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                        {
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.003));
+                            Robot_Z -= 0.003;
+                            RobotDZ -= 0.003;
+                            RobotUZ -= 0.003;
+                        }
                     }
                 }
             }
         }
+        else if (Floor_state == 1) {
+            for (int i = 0; i < 20; ++i) {
+                for (int p = 0; p < 20; ++p) {
+                    if (Stage2[i][p] == 1) {
+                        if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                        {
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.003));
+                            Robot_Z -= 0.003;
+                            RobotDZ -= 0.003;
+                            RobotUZ -= 0.003;
+                        }
+                    }
+                }
+            }
+        }
+
 
         break;
     case 'w':
@@ -676,19 +694,37 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         Robot_Z -= 0.003;
         RobotDZ -= 0.003;
         RobotUZ -= 0.003;
-        for (int i = 0; i < 20; ++i) {
-            for (int p = 0; p < 20; ++p) {
-                if (Stage2[i][p] == 1) {
-                    if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
-                    {
-                        TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.003));
-                        Robot_Z += 0.003;
-                        RobotDZ += 0.003;
-                        RobotUZ += 0.003;
+        if (Floor_state == 2) {
+            for (int i = 0; i < 20; ++i) {
+                for (int p = 0; p < 20; ++p) {
+                    if (Stage2[i][p] == 1) {
+                        if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                        {
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.003));
+                            Robot_Z += 0.003;
+                            RobotDZ += 0.003;
+                            RobotUZ += 0.003;
+                        }
                     }
                 }
             }
         }
+        else if (Floor_state == 1) {
+            for (int i = 0; i < 20; ++i) {
+                for (int p = 0; p < 20; ++p) {
+                    if (Stage2[i][p] == 1) {
+                        if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                        {
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.003));
+                            Robot_Z += 0.003;
+                            RobotDZ += 0.003;
+                            RobotUZ += 0.003;
+                        }
+                    }
+                }
+            }
+        }
+
 
         break;
     case 'a':
@@ -727,20 +763,36 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         Robot_X -= 0.003;
         RobotLX -= 0.003;
         RobotRX -= 0.003;
-        for (int i = 0; i < 20; ++i) {
-            for (int p = 0; p < 20; ++p) {
-                if (Stage2[i][p] == 1) {
-                    if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
-                    {
-                        TT_Robot = glm::translate(TT_Robot, glm::vec3(0.003, 0, 0));
-                        Robot_X += 0.003;
-                        RobotLX += 0.003;
-                        RobotRX += 0.003;
+        if (Floor_state == 2) {
+            for (int i = 0; i < 20; ++i) {
+                for (int p = 0; p < 20; ++p) {
+                    if (Stage2[i][p] == 1) {
+                        if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                        {
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0.003, 0, 0));
+                            Robot_X += 0.003;
+                            RobotLX += 0.003;
+                            RobotRX += 0.003;
+                        }
                     }
                 }
             }
         }
-
+        else if (Floor_state == 2) {
+            for (int i = 0; i < 20; ++i) {
+                for (int p = 0; p < 20; ++p) {
+                    if (Stage2[i][p] == 1) {
+                        if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                        {
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0.003, 0, 0));
+                            Robot_X += 0.003;
+                            RobotLX += 0.003;
+                            RobotRX += 0.003;
+                        }
+                    }
+                }
+            }
+        }
         break;
     case 'd':
         //·Îº¿ ¿À¸¥ÂÊÀ¸·Î °È±â 
@@ -778,15 +830,32 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         Robot_X += 0.003;
         RobotLX += 0.003;
         RobotRX += 0.003;
-        for (int i = 0; i < 20; ++i) {
-            for (int p = 0; p < 20; ++p) {
-                if (Stage2[i][p] == 1) {
-                    if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
-                    {
-                        TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.003, 0, 0));
-                        Robot_X -= 0.003;
-                        RobotLX -= 0.003;
-                        RobotRX -= 0.003;
+        if (Floor_state == 2) {
+            for (int i = 0; i < 20; ++i) {
+                for (int p = 0; p < 20; ++p) {
+                    if (Stage2[i][p] == 1) {
+                        if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                        {
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.003, 0, 0));
+                            Robot_X -= 0.003;
+                            RobotLX -= 0.003;
+                            RobotRX -= 0.003;
+                        }
+                    }
+                }
+            }
+        }
+        else if (Floor_state == 1) {
+            for (int i = 0; i < 20; ++i) {
+                for (int p = 0; p < 20; ++p) {
+                    if (Stage2[i][p] == 1) {
+                        if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                        {
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.003, 0, 0));
+                            Robot_X -= 0.003;
+                            RobotLX -= 0.003;
+                            RobotRX -= 0.003;
+                        }
                     }
                 }
             }
