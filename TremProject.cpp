@@ -100,6 +100,8 @@ GLuint Stage2[20][20] = { 0,0,1,0,0,0,0,0,0,1,0,1,0,1,0,1,1,0,1,0,
                           1,1,1,0,1,0,0,1,1,1,1,1,1,1,1,1,1,0,1,0,
                           0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                           1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0 };
+
+
 // 타일맵 배치로 변경
 
 //-------------------------------------------------
@@ -108,6 +110,8 @@ glm::mat4 TlLeg = glm::mat4(1.0f); //Robot 왼쪽 다리 변환
 glm::mat4 TrLeg = glm::mat4(1.0f); //Robot 오른쪽 다리 변환    
 glm::mat4 TlArm = glm::mat4(1.0f); //Robot 왼쪽 팔 변환      
 glm::mat4 TrArm = glm::mat4(1.0f); //Robot 오른쪽 팔 변환     
+
+
 glm::mat4 TT_Robot = glm::mat4(1.0f); //Robot전체 이동  
 glm::mat4 TR_Robot = glm::mat4(1.0f); //Robot전체 회전   
 glm::mat4 TJ_Robot = glm::mat4(1.0f); //Robot전체 점프    -> 이건 지금 코드에서는 필요 없음 
@@ -116,23 +120,21 @@ float moving1, moving2, moving3, moving4;
 int leftArmtype, rightArmtype, leftlegtype, rightlegtype;
 char current = '0';
 //로봇의 위치
-float RobotLX = -0.325;
-float RobotRX = -0.325;
-float RobotDZ = 0.5;
-float RobotUZ = 0.5;
+float RobotLX = -0.34;
+float RobotRX = -0.31;
+float RobotUZ = 0.49;
+float RobotDZ = 0.46;
 float RobotY = 0.52;
 //-------------------------------------------------
 GLfloat Robot_X = -0.325;
 GLfloat Robot_Y = 0.52;
-GLfloat Robot_Z = 0.5;
+GLfloat Robot_Z = 0.475;
 //------------------------------------------------
 struct BB {
     float minx;
     float minz;
     float maxx;
     float maxz;
-
-    BB() {}
 
     BB(float minX, float minZ, float maxX, float maxZ)
     {
@@ -156,18 +158,34 @@ bool Collide(BB a, BB b)
 }
 BB getbb_robot(float centerx, float centerz)
 {
-    return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);
+    return BB(centerx - 0.015f, centerz - 0.015, centerx + 0.015f, centerz + 0.015f);
+
 }
 BB getbb_cube(float centerx, float centerz)
 {
-    return BB(centerx, centerz, centerx, centerz);
+    return BB(centerx - 0.025f, centerz - 0.025, centerx + 0.025f, centerz + 0.025);
 }
-// 충돌함수를만들어서 robot과 cube의 x축과 z축중심으로 하나의 사각형을생성함.
-// cube의 중심값이 들어가있지않는 이유는 미로의 왼쪽상단꼭지점과의 충돌처리를 확인하기위해
-// robot의 body의 스케일값을 계산해 넣은값이 0.015
-// GLfloat Robot_X와 Robot_Z의 값을 넣은 이유는 그냥 로봇좌표따라나니는애
-// getbb_robot에서 값 계산을 잘못한건 아닌것같음
-// 
+float CubeCenterX[20][20];
+float CubeCenterZ[20][20];
+GLvoid GetCenterX() {
+    for (int p = 0; p < 20; ++p) {
+        CubeCenterX[0][p] = -0.475 + (0.05 * p);
+
+    }
+    for (int i = 0; i < 20; ++i) {
+        for (int p = 0; p < 20; ++p) {
+            CubeCenterX[i][p] = -0.475 + (0.05 * p);
+        }
+    }
+}
+GLvoid GetCenterZ() {
+    for (int p = 0; p < 20; ++p) {
+        for (int i = 0; i < 20; ++i) {
+            CubeCenterZ[i][p] = -0.475 + (0.05 * i);
+        }
+    }
+}
+
 //------------------------------------------------------------
 GLvoid InitBuffer() {
     num_Triangle = obj.loadObj("Cube.obj");
@@ -205,33 +223,23 @@ void UserFunc() {
     srand((unsigned int)time(NULL));
     for (int i = 0; i < 20; i++) {
         for (int p = 0; p < 20; p++) {
-            MDataArr[i][p].is = 0;
-            //크기 스케일  
-            MDataArr[i][p].sx = 1.0 / 20;
-            MDataArr[i][p].sy = 0.3;
-            MDataArr[i][p].sz = 1.0 / 20;
-
             //위치 이동하기  
             MDataArr[i][p].x = (-0.5 + (1.0 / w) / 2) + ((1.0 / w) * p);
             MDataArr[i][p].y = 0;
             MDataArr[i][p].z = (-0.5 + (1.0 / h) / 2) + ((1.0 / h) * i);
 
-            //------------------------------------------------------------- 
+            //위치 계산하기  
+            MDataArr[i][p].lx = (-0.5 + ((1.0 / w) * p)); //왼      
+            MDataArr[i][p].rx = (-0.5 + ((1.0 / w) * p)) + (1.0 / w); //오      
+            MDataArr[i][p].uz = (-0.5 + ((1.0 / h) * i)) + (1.0 / h); //양의 방향쪽 z       
+            MDataArr[i][p].dz = (-0.5 + ((1.0 / h) * i)); //음의 방향쪽 z    
 
-
-            //위치 계산하기 
-            MDataArr[i][p].lx = (-0.5 + ((1.0 / 20) * p)); //왼     
-            MDataArr[i][p].rx = (-0.5 + ((1.0 / 20) * p)) + (1.0 / 20); //오    
-            MDataArr[i][p].uz = (-0.5 + ((1.0 / 20) * i)) + (1.0 / 20); //양의 방향쪽 z      
-            MDataArr[i][p].dz = (-0.5 + ((1.0 / 20) * i)); //음의 방향쪽 z   
-
-            if (MDataArr[i][p].lx + (1.0 / w) == 0) {
+            if (MDataArr[i][p].lx == float(-0.05)) {
                 MDataArr[i][p].rx = 0;
             }
-            if (MDataArr[i][p].dz + (1.0 / h) == 0) {
+            if (MDataArr[i][p].dz == float(-0.05)) {
                 MDataArr[i][p].uz = 0;
             }
-            //y = 0.2;
             //--------------------------------------------------------------------
 
             MDataArr2[i][p].is = 0;
@@ -254,15 +262,18 @@ void UserFunc() {
             MDataArr2[i][p].uz = (-0.5 + ((1.0 / 20) * i)) + (1.0 / 20); //양의 방향쪽 z      
             MDataArr2[i][p].dz = (-0.5 + ((1.0 / 20) * i)); //음의 방향쪽 z   
 
-            if (MDataArr2[i][p].lx + (1.0 / w) == 0) {
+            if (MDataArr2[i][p].lx == float(-0.05)) {
                 MDataArr2[i][p].rx = 0;
             }
-            if (MDataArr2[i][p].dz + (1.0 / h) == 0) {
+            if (MDataArr2[i][p].dz == float(-0.05)) {
                 MDataArr2[i][p].uz = 0;
             }
+
             //y = 0.62;
         }
     }
+    GetCenterX();
+    GetCenterZ();
 }
 GLvoid InitLight() {
     lightColorLocation = glGetUniformLocation(shaderID, "lightColor");
@@ -279,7 +290,7 @@ GLvoid Pro() {
     glUseProgram(shaderID);
     projection = glm::mat4(1.0f);
     Angle = glm::radians(45.0f);
-    projection = glm::perspective(Angle, (float)800 / (float)600, 1.0f, 50.0f);
+    projection = glm::perspective(Angle, (float)1000 / (float)1000, 1.0f, 50.0f);
     projection = glm::translate(projection, glm::vec3(0.0, 0.0, -2));
     projectionLocation = glGetUniformLocation(shaderID, "projectionTransform"); //--- 투영 변환 값 설정  
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
@@ -449,6 +460,9 @@ GLvoid RobotLegs() {
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
+
+
+
 GLvoid drawScene()
 {
     glClearColor(0, 0, 0, 1.0f);
@@ -472,17 +486,6 @@ GLvoid drawScene()
         for (int p = 0; p < 20; p++) {
             if (Stage2[i][p] == 1) {
                 Mountins2(i, p);
-            }
-        }
-    }
-
-    for (int i = 0; i < 20; ++i) {
-        for (int p = 0; p < 20; ++p) {
-            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(MDataArr2[i][p].lx, MDataArr2[i][p].uz)) == true)
-            {
-                cout << "충돌" << endl;
-                // 여기 부분에서 충돌처리가 잘 안됨.
-                // 미로하나의 왼쪽상단점으로 충돌처리를 한 코드
             }
         }
     }
@@ -617,9 +620,25 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         }
         TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.003));
         current = 's';
+
         Robot_Z += 0.003;
         RobotDZ += 0.003;
         RobotUZ += 0.003;
+
+        for (int i = 0; i < 20; ++i) {
+            for (int p = 0; p < 20; ++p) {
+                if (Stage2[i][p] == 1) {
+                    if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                    {
+                        TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.003));
+                        Robot_Z -= 0.003;
+                        RobotDZ -= 0.003;
+                        RobotUZ -= 0.003;
+                    }
+                }
+            }
+        }
+
         break;
     case 'w':
         //로봇 뒤로 걷기 
@@ -653,9 +672,24 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         }
         TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.003));
         current = 'w';
+
         Robot_Z -= 0.003;
         RobotDZ -= 0.003;
         RobotUZ -= 0.003;
+        for (int i = 0; i < 20; ++i) {
+            for (int p = 0; p < 20; ++p) {
+                if (Stage2[i][p] == 1) {
+                    if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                    {
+                        TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.003));
+                        Robot_Z += 0.003;
+                        RobotDZ += 0.003;
+                        RobotUZ += 0.003;
+                    }
+                }
+            }
+        }
+
         break;
     case 'a':
         //로봇 왼쪽으로 걷기 
@@ -689,9 +723,24 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         }
         TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.003, 0, 0));
         current = 'a';
+
         Robot_X -= 0.003;
         RobotLX -= 0.003;
         RobotRX -= 0.003;
+        for (int i = 0; i < 20; ++i) {
+            for (int p = 0; p < 20; ++p) {
+                if (Stage2[i][p] == 1) {
+                    if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                    {
+                        TT_Robot = glm::translate(TT_Robot, glm::vec3(0.003, 0, 0));
+                        Robot_X += 0.003;
+                        RobotLX += 0.003;
+                        RobotRX += 0.003;
+                    }
+                }
+            }
+        }
+
         break;
     case 'd':
         //로봇 오른쪽으로 걷기 
@@ -729,6 +778,20 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         Robot_X += 0.003;
         RobotLX += 0.003;
         RobotRX += 0.003;
+        for (int i = 0; i < 20; ++i) {
+            for (int p = 0; p < 20; ++p) {
+                if (Stage2[i][p] == 1) {
+                    if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(CubeCenterX[i][p], CubeCenterZ[i][p])) == true)
+                    {
+                        TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.003, 0, 0));
+                        Robot_X -= 0.003;
+                        RobotLX -= 0.003;
+                        RobotRX -= 0.003;
+                    }
+                }
+            }
+        }
+
         break;
     case 'Q':
         puts("- Program End - ");
@@ -740,7 +803,7 @@ int main(int argc, char** argv)
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GL_DEPTH);
     glutInitWindowPosition(100, 100);
-    glutInitWindowSize(1500, 1500);
+    glutInitWindowSize(1000, 1000);
     glutCreateWindow("TermProject");
 
     glewExperimental = GL_TRUE;
