@@ -438,9 +438,12 @@ glm::mat4 TT_Robot = glm::mat4(1.0f); //Robot전체 이동
 glm::mat4 TR_Robot = glm::mat4(1.0f); //Robot전체 회전   
 glm::mat4 TJ_Robot = glm::mat4(1.0f); //Robot전체 점프
 
-glm::mat4 TT_Monster = glm::mat4(1.0f); //Robot전체 이동  
-glm::mat4 TR_Monster = glm::mat4(1.0f); //Robot전체 회전   
-glm::mat4 TJ_Monster = glm::mat4(1.0f); //Robot전체 점프   
+glm::mat4 TT_Monster[8];
+glm::mat4 TR_Monster[8]; 
+glm::mat4 TJ_Monster[8]; 
+
+
+glm::mat4 location = glm::mat4(1.0f); 
 //-------------------------------------------------------------
 
 float moving1, moving2, moving3, moving4;
@@ -453,20 +456,12 @@ float RobotUZ = 0.49;
 float RobotDZ = 0.46;
 float RobotY = 0.52;
 
-//몬스터의 위치
-float MonsterLX = -0.34;
-float MonsterRX = -0.31;
-float MonsterUZ = 0.59;
-float MonsterDZ = 0.56;
-float MonsterY = 0.52;
 //-------------------------------------------------
 GLfloat Robot_X = -0.325;
 GLfloat Robot_Y = 0.52;
 GLfloat Robot_Z = 0.475;
-
-GLfloat Monster_X = -0.325;
-GLfloat Monster_Y = 0.52;
-GLfloat Monster_Z = 0.575;
 GLuint Floor_state = 2;
+
+
 //------------------------------------------------
 
