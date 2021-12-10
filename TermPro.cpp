@@ -16,7 +16,7 @@ glm::mat4 TeleportModel = glm::mat4(1.0f);
 glm::mat4 ExitboxModel = glm::mat4(1.0f);
 
 //-----------------------------------  
-float cx = 0.0, cy = 0.006f, cz = 0.01;
+float cx = 0.0, cy = 1.0f, cz = 0.01;
 float c2x = 0.0, c2y = 0.0, c2z = 0.0;
 glm::vec3 cameraPos = glm::vec3(cx, cy, cz);
 glm::vec3 cameraDirection = glm::vec3(c2x, c2y, c2z);
@@ -77,6 +77,11 @@ BB getbb_robot(float centerx, float centerz)
 
 }
 BB getbb_teleport(float centerx, float centerz)
+{
+    return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);
+
+}
+BB getbb_exit(float centerx, float centerz)
 {
     return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);
 
@@ -981,9 +986,12 @@ GLvoid drawScene()
         }
     }
     //if (Bad_ending == true) {
-    //    cout << "엔딩씬 구현은 어떤식으로.." << endl;
+    //    cout << "배드엔딩할꺼 이쪽으로" << endl;
     //}
-    //Wall();
+    //if (Happy_ending == true) {
+    //    cout << "해피엔딩할꺼 이쪽으로" << endl;
+    //}
+    Wall();
     Robot(); 
     Teleport();
     for (int i = 0; i < 8; ++i) {
@@ -1161,7 +1169,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
-            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_exit(box_x, box_z)) == true) {
                 Happy_ending = true;
             }
         }
@@ -1245,7 +1253,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
-            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_exit(box_x, box_z)) == true) {
                 Happy_ending = true;
             }
         }
@@ -1332,7 +1340,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
-            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_exit(box_x, box_z)) == true) {
                 Happy_ending = true;
             }
         }
@@ -1393,7 +1401,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
-            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(tel_x, tel_z)) == true) {
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_exit(tel_x, tel_z)) == true) {
                 R_y = 0.1f;
                 Floor_state = 1;
             }
@@ -1416,7 +1424,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
-            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_exit(box_x, box_z)) == true) {
                 Happy_ending = true;
             }
         }
