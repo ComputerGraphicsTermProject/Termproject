@@ -1,8 +1,9 @@
-#include "TermPro.h"  
+#define STB_IMAGE_IMPLEMENTATION 
+#include "TermPro.h"
+#include "stb_image.h"  
 int num_Triangle[2];
 objReader obj[2];
-GLuint VAO[3], VBO_pos[3], VBO_normal[3], VBO_color[3];
-GLuint VAO2[3], VBO_pos2[3], VBO_normal2[3], VBO_color2[3];
+GLuint VAO[3], VBO_pos[3], VBO_normal[3], VBO_uv[3]; 
 //-----------------------------------  
 glm::mat4 CubeModel = glm::mat4(1.0f);
 glm::mat4 MiroModel = glm::mat4(1.0f);
@@ -13,13 +14,13 @@ glm::mat4 view = glm::mat4(1.0f);
 glm::mat4 RobotModel = glm::mat4(1.0f);
 glm::mat4 MonsterModel = glm::mat4(1.0f);
 //-----------------------------------  
-float cx = 0, cy = 1, cz = 0.01;
-float c2x = 0.0, c2y = 0.0, c2z = 0.0;
-glm::vec3 cameraPos = glm::vec3(cx, cy, cz);
-glm::vec3 cameraDirection = glm::vec3(c2x, c2y, c2z);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-GLfloat lightX = 2.0, lightY = 2.0, lightZ = 0.0;
-GLfloat lightR = 1.0, lightG = 1.0, lightB = 1.0;
+float cx =0.0, cy = 1.0f, cz = 0.01;   
+float c2x = 0.0, c2y = 0.0, c2z = 0.0;  
+glm::vec3 cameraPos = glm::vec3(cx, cy, cz);  
+glm::vec3 cameraDirection = glm::vec3(c2x, c2y, c2z); 
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); 
+GLfloat lightX = 2.0, lightY = 2.0, lightZ = 0.0; 
+GLfloat lightR = 1.0, lightG = 1.0, lightB = 1.0; 
 //----------------------------------------------
 struct BB {
     float minx;
@@ -70,9 +71,9 @@ BB getbb_monster(float centerx, float centerz)
 }
 BB getbb_robot(float centerx, float centerz)
 {
-    return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);
+    return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);   
 
-}
+} 
 BB getbb_cube(float centerx, float centerz)
 {
     return BB(centerx - 0.025f, centerz - 0.025, centerx + 0.025f, centerz + 0.025);
@@ -99,12 +100,33 @@ GLvoid GetCenterZ() {
     }
 }
 //------------------------------------------------------------
+
+GLuint texture[7];
+int tLocation;
+GLvoid InitTexture()
+{
+    int width[7], height[7], nrChannels[7];
+    glGenTextures(1, &texture[0]); //--- 텍스처 생성
+    glBindTexture(GL_TEXTURE_2D, texture[0]); //--- 텍스처 바인딩 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data = stbi_load("sky.bmp", &width[0], &height[0], &nrChannels[0], 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, width[0], height[0], 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
+    glUseProgram(shaderID);
+    tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
+    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
+    stbi_image_free(data);
+}
+
 GLvoid InitBuffer() {
     num_Triangle[0] = obj[0].loadObj("Cube.obj");
     glGenVertexArrays(3, VAO);
     glGenBuffers(3, VBO_pos);
     glGenBuffers(3, VBO_normal);
-    glGenBuffers(3, VBO_color);
+    glGenBuffers(3, VBO_uv);
 
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
@@ -117,6 +139,12 @@ GLvoid InitBuffer() {
     glBufferData(GL_ARRAY_BUFFER, obj[0].outnormal.size() * sizeof(glm::vec3), &obj[0].outnormal[0], GL_STATIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
     glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_uv[0]); 
+    glBufferData(GL_ARRAY_BUFFER, obj[0].outuv.size() * sizeof(glm::vec3), &obj[0].outuv[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    glEnableVertexAttribArray(2); 
+
 }
 void UserFunc() {
     int w = 20;
@@ -201,11 +229,11 @@ GLvoid Pro() {
     //원근 투영 ver 
     glUseProgram(shaderID);
     projection = glm::mat4(1.0f);
-    Angle = glm::radians(45.0f);
-    projection = glm::perspective(Angle, (float)1000 / (float)1000, 1.0f, 50.0f);
-    projection = glm::translate(projection, glm::vec3(0.0, 0.0, -2));
+    Angle = glm::radians(40.0f); 
+    projection = glm::perspective(Angle, (float)1000 / (float)1000, 1.0f, 50.0f); 
+    projection = glm::translate(projection, glm::vec3(0.0, 0.0, -2.0)); 
     projectionLocation = glGetUniformLocation(shaderID, "projectionTransform"); //--- 투영 변환 값 설정  
-    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
+    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]); 
 }
 GLvoid View() {
     glUseProgram(shaderID);
@@ -247,7 +275,7 @@ GLvoid Floor() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
-    glUniform3f(objColorLocation, 0.5, 0.5, 0.5);
+    glUniform3f(objColorLocation, 0.5,0.5,0); 
 
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 0.1, 1));
@@ -259,7 +287,7 @@ GLvoid Floor2() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
-    glUniform3f(objColorLocation, 0.5, 0.5, 0.5);
+    glUniform3f(objColorLocation, 0,0.5,0.5); 
 
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 0.1, 1));
@@ -267,7 +295,9 @@ GLvoid Floor2() {
 
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+
 }
 //벽면
 GLvoid Wall() {
@@ -277,15 +307,15 @@ GLvoid Wall() {
     glUniform3f(objColorLocation, 0.5, 0.5, 0.5);
     //오른쪽
     CubeModel = glm::mat4(1.0f);
-    CubeModel = glm::translate(CubeModel, glm::vec3(0.5, 0.5, 0));
+    CubeModel = glm::translate(CubeModel, glm::vec3(0.537, 0.5, 0));
     CubeModel = glm::scale(CubeModel, glm::vec3(0.05, 1, 1.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 
-    //왼쪽
+    //왼쪽  
     CubeModel = glm::mat4(1.0f);
-    CubeModel = glm::translate(CubeModel, glm::vec3(-0.5, 0.5, 0));
+    CubeModel = glm::translate(CubeModel, glm::vec3(-0.537, 0.5, 0));
     CubeModel = glm::scale(CubeModel, glm::vec3(0.05, 1, 1.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
@@ -293,16 +323,16 @@ GLvoid Wall() {
 
     //아래 
     CubeModel = glm::mat4(1.0f);
-    CubeModel = glm::translate(CubeModel, glm::vec3(0, 0, 0.5));
-    CubeModel = glm::scale(CubeModel, glm::vec3(1, 2, 0.05));
+    CubeModel = glm::translate(CubeModel, glm::vec3(0, 0.5, 0.537));
+    CubeModel = glm::scale(CubeModel, glm::vec3(1, 1, 0.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 
     //위
     CubeModel = glm::mat4(1.0f);
-    CubeModel = glm::translate(CubeModel, glm::vec3(0, 0, -0.5));
-    CubeModel = glm::scale(CubeModel, glm::vec3(1, 2, 0.05));
+    CubeModel = glm::translate(CubeModel, glm::vec3(0, 0.5, -0.537));
+    CubeModel = glm::scale(CubeModel, glm::vec3(1, 1, 0.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
@@ -388,97 +418,21 @@ GLvoid Robot() {
 //---------------------------------
 class Monster_info {
 public:
-    float MX{};
-    float MY{};
-    float MZ{};
+    float MX{}; 
+    float MY{}; 
+    float MZ{}; 
 
-    float Monster_X{};
-    float Monster_Y{};
-    float Monster_Z{};
+    float Monster_X{}; 
+    float Monster_Y{}; 
+    float Monster_Z{}; 
 
     int floor{};
-    int automoving = 0; 
-
-    glm::mat4 TT_Monster = glm::mat4(1.0f); 
-    glm::mat4 TR_Monster = glm::mat4(1.0f); 
-    glm::mat4 TJ_Monster = glm::mat4(1.0f); 
-
-    GLvoid DrawMonster() {
-        glUseProgram(shaderID);
-        glBindVertexArray(VAO[0]);
-        InitLight();
-        //Body  
-        MonsterModel = glm::mat4(1.0f);
-        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
-        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX, MY, MZ));
-        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.03, 0.03, 0.03));
-        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 0, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        //face
-        MonsterModel = glm::mat4(1.0f);
-        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
-        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX, MY + 0.02, MZ));
-        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.025, 0.025, 0.025));
-        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 0, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        //nose
-        MonsterModel = glm::mat4(1.0f);
-        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
-        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX, MY + 0.003, MZ + 0.02));
-        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.01, 0.01));
-        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        //left Arm
-        MonsterModel = glm::mat4(1.0f);
-        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
-        Angle = glm::radians(-90.0);
-        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX - 0.02, MY, MZ + 0.01));
-        MonsterModel = glm::rotate(MonsterModel, Angle, glm::vec3(0, 0, 1));
-        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.03, 0.005));
-        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        //right Arm
-        MonsterModel = glm::mat4(1.0f);
-        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
-        Angle = glm::radians(-90.0);
-        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX + 0.02, MY, MZ + 0.01));
-        MonsterModel = glm::rotate(MonsterModel, Angle, glm::vec3(0, 0, 1));
-        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.03, 0.005));
-        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36); 
-
-        //left Leg
-        MonsterModel = glm::mat4(1.0f);
-        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
-        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX - 0.013, MY - 0.03, MZ - 0.005));
-        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.032, 0.01));
-        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        //right Leg  
-        MonsterModel = glm::mat4(1.0f);
-        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
-        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX + 0.013, MY - 0.03, MZ - 0.005));
-        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.032, 0.01));
-        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
-        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
+    int automoving = 0;  
+    int current = 0; 
+    glm::mat4 TT_Monster = glm::mat4(1.0f);  
+    glm::mat4 TR_Monster = glm::mat4(1.0f);  
+    glm::mat4 TJ_Monster = glm::mat4(1.0f);  
+    glm::mat4 MonsterModel = glm::mat4(1.0f);
     GLvoid MonsterMoving() {
         switch (automoving) {
         case 0:
@@ -532,6 +486,7 @@ public:
                             {
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, -0.003));
                                 Monster_Z -= 0.003;
+                                //
 
                             }
                         }
@@ -567,6 +522,7 @@ public:
                     }
                 }
             }
+            current = 0;
             break;
         case 1:
             if (current == 0) {
@@ -662,6 +618,7 @@ public:
                     }
                 }
             }
+            current = 1;
             break;
         case 2:
             if (current == 0) {
@@ -756,6 +713,7 @@ public:
                     }
                 }
             }
+            current = 2;
             break;
         case 3:
             //로봇 오른쪽으로 걷기 
@@ -851,10 +809,88 @@ public:
                     }
                 }
             }
+            current = 3;
             break;
         }
     }
+    GLvoid DrawMonster() {
+        glUseProgram(shaderID);
+        glBindVertexArray(VAO[0]);
+        InitLight();
+        //Body  
+        MonsterModel = glm::mat4(1.0f);
+        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
+        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX, MY, MZ));
+        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.03, 0.03, 0.03));
+        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
+        glUniform3f(objColorLocation, 1, 0, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //face
+        MonsterModel = glm::mat4(1.0f);
+        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
+        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX, MY + 0.02, MZ));
+        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.025, 0.025, 0.025));
+        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
+        glUniform3f(objColorLocation, 1, 0, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //nose
+        MonsterModel = glm::mat4(1.0f);
+        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
+        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX, MY + 0.003, MZ + 0.02));
+        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.01, 0.01));
+        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
+        glUniform3f(objColorLocation, 1, 1, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //left Arm
+        MonsterModel = glm::mat4(1.0f);
+        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
+        Angle = glm::radians(-90.0);
+        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX - 0.02, MY, MZ + 0.01));
+        MonsterModel = glm::rotate(MonsterModel, Angle, glm::vec3(0, 0, 1));
+        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.03, 0.005));
+        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
+        glUniform3f(objColorLocation, 1, 1, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //right Arm
+        MonsterModel = glm::mat4(1.0f);
+        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
+        Angle = glm::radians(-90.0);
+        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX + 0.02, MY, MZ + 0.01));
+        MonsterModel = glm::rotate(MonsterModel, Angle, glm::vec3(0, 0, 1));
+        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.03, 0.005));
+        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
+        glUniform3f(objColorLocation, 1, 1, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //left Leg
+        MonsterModel = glm::mat4(1.0f);
+        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
+        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX - 0.013, MY - 0.03, MZ - 0.005));
+        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.032, 0.01));
+        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
+        glUniform3f(objColorLocation, 1, 1, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //right Leg  
+        MonsterModel = glm::mat4(1.0f);
+        MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
+        MonsterModel = glm::translate(MonsterModel, glm::vec3(MX + 0.013, MY - 0.03, MZ - 0.005));
+        MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.032, 0.01));
+        modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
+        glUniform3f(objColorLocation, 1, 1, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 };
+
 Monster_info MonsterArr[8];
 GLvoid InitMonster() {
     for (int i = 0; i < 4; ++i) {
@@ -863,7 +899,7 @@ GLvoid InitMonster() {
     for (int i = 4; i < 8; ++i) {
         MonsterArr[i].floor = 1;
     }
-
+    //2층
     MonsterArr[0].Monster_X = 0.475, MonsterArr[0].MX = 0.475;
     MonsterArr[0].Monster_Y = 0.52, MonsterArr[0].MY = 0.52;
     MonsterArr[0].Monster_Z = -0.475, MonsterArr[0].MZ = -0.475;
@@ -880,7 +916,7 @@ GLvoid InitMonster() {
     MonsterArr[3].Monster_Y = 0.52, MonsterArr[3].MY = 0.52;
     MonsterArr[3].Monster_Z = 0.275, MonsterArr[3].MZ = 0.275;
 
-
+    //1층
     MonsterArr[4].Monster_X = 0.025, MonsterArr[4].MX = 0.025;
     MonsterArr[4].Monster_Y = 0.1, MonsterArr[4].MY = 0.1;
     MonsterArr[4].Monster_Z = -0.425, MonsterArr[4].MZ = -0.425;
@@ -1053,12 +1089,12 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             TR_Robot = glm::rotate(TR_Robot, Angle, glm::vec3(0, 1, 0));
             TR_Robot = glm::translate(TR_Robot, glm::vec3(0.325, -0.52, -0.5));
         }
-        TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.003));
+        TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.005));
         current = 's';
 
-        Robot_Z += 0.003;
-        RobotDZ += 0.003;
-        RobotUZ += 0.003;
+        Robot_Z += 0.005;
+        RobotDZ += 0.005;
+        RobotUZ += 0.005;
 
         if (Floor_state == 2) {
             for (int i = 0; i < 20; ++i) {
@@ -1071,10 +1107,10 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall3()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true) 
                         {
-                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.003));
-                            Robot_Z -= 0.003;
-                            RobotDZ -= 0.003;
-                            RobotUZ -= 0.003;
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.005));
+                            Robot_Z -= 0.005;
+                            RobotDZ -= 0.005;
+                            RobotUZ -= 0.005;
                         }
                     }
                 }
@@ -1090,10 +1126,10 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall3()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true)
                         {
-                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.003));
-                            Robot_Z -= 0.003;
-                            RobotDZ -= 0.003;
-                            RobotUZ -= 0.003;
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.005));
+                            Robot_Z -= 0.005;
+                            RobotDZ -= 0.005;
+                            RobotUZ -= 0.005;
                         }
                     }
                 }
@@ -1130,12 +1166,12 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             TR_Robot = glm::rotate(TR_Robot, Angle, glm::vec3(0, 1, 0));
             TR_Robot = glm::translate(TR_Robot, glm::vec3(0.325, -0.52, -0.5));
         }
-        TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.003));
+        TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.005));
         current = 'w';
 
-        Robot_Z -= 0.003;
-        RobotDZ -= 0.003;
-        RobotUZ -= 0.003;
+        Robot_Z -= 0.005;
+        RobotDZ -= 0.005;
+        RobotUZ -= 0.005;
 
         if (Floor_state == 2) {
             for (int i = 0; i < 20; ++i) {
@@ -1148,10 +1184,10 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall3()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true)
                         {
-                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.003));
-                            Robot_Z += 0.003;
-                            RobotDZ += 0.003;
-                            RobotUZ += 0.003;
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.005));
+                            Robot_Z += 0.005;
+                            RobotDZ += 0.005;
+                            RobotUZ += 0.005;
                         }
                     }
                 }
@@ -1167,10 +1203,10 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall3()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true)
                         {
-                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.003));
-                            Robot_Z += 0.003;
-                            RobotDZ += 0.003;
-                            RobotUZ += 0.003;
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, 0.005));
+                            Robot_Z += 0.005;
+                            RobotDZ += 0.005;
+                            RobotUZ += 0.005;
                         }
                     }
                 }
@@ -1210,13 +1246,13 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             TR_Robot = glm::rotate(TR_Robot, Angle, glm::vec3(0, 1, 0));
             TR_Robot = glm::translate(TR_Robot, glm::vec3(0.325, -0.52, -0.5));
         }
-        TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.003, 0, 0));
+        TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.005, 0, 0));
 
         current = 'a';
 
-        Robot_X -= 0.003;
-        RobotLX -= 0.003;
-        RobotRX -= 0.003;
+        Robot_X -= 0.005;
+        RobotLX -= 0.005;
+        RobotRX -= 0.005;
 
         if (Floor_state == 2) {
             for (int i = 0; i < 20; ++i) {
@@ -1228,10 +1264,10 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall3()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true)
                         {
-                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0.003, 0, 0));
-                            Robot_X += 0.003;
-                            RobotLX += 0.003;
-                            RobotRX += 0.003;
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0.005, 0, 0));
+                            Robot_X += 0.005;
+                            RobotLX += 0.005;
+                            RobotRX += 0.005;
                         }
                     }
                 }
@@ -1247,10 +1283,10 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall3()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true)
                         {
-                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0.003, 0, 0));
-                            Robot_X += 0.003;
-                            RobotLX += 0.003;
-                            RobotRX += 0.003;
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(0.005, 0, 0));
+                            Robot_X += 0.005;
+                            RobotLX += 0.005;
+                            RobotRX += 0.005;
                         }
                     }
                 }
@@ -1265,16 +1301,13 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             TR_Robot = glm::translate(TR_Robot, glm::vec3(-0.325, 0.52, 0.5));
             TR_Robot = glm::rotate(TR_Robot, Angle, glm::vec3(0, 1, 0));
             TR_Robot = glm::translate(TR_Robot, glm::vec3(0.325, -0.52, -0.5));
-
         }
         else if (current == 's') {
             //회전시킬 것
-            Angle = glm::radians(90.0);
+            Angle = glm::radians(90.0); 
             TR_Robot = glm::translate(TR_Robot, glm::vec3(-0.325, 0.52, 0.5));
             TR_Robot = glm::rotate(TR_Robot, Angle, glm::vec3(0, 1, 0));
             TR_Robot = glm::translate(TR_Robot, glm::vec3(0.325, -0.52, -0.5));
-
-
         }
         else if (current == 'a') {
             //회전시킬 것 
@@ -1282,8 +1315,6 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             TR_Robot = glm::translate(TR_Robot, glm::vec3(-0.325, 0.52, 0.5));
             TR_Robot = glm::rotate(TR_Robot, Angle, glm::vec3(0, 1, 0));
             TR_Robot = glm::translate(TR_Robot, glm::vec3(0.325, -0.52, -0.5));
-
-
         }
         else if (current == 'w') {
             //회전시킬 것 
@@ -1291,16 +1322,14 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             TR_Robot = glm::translate(TR_Robot, glm::vec3(-0.325, 0.52, 0.5));
             TR_Robot = glm::rotate(TR_Robot, Angle, glm::vec3(0, 1, 0));
             TR_Robot = glm::translate(TR_Robot, glm::vec3(0.325, -0.52, -0.5));
-
-
         }
-        TT_Robot = glm::translate(TT_Robot, glm::vec3(0.003, 0, 0));
+        TT_Robot = glm::translate(TT_Robot, glm::vec3(0.005, 0, 0));
 
         current = 'd';
 
-        Robot_X += 0.003;
-        RobotLX += 0.003;
-        RobotRX += 0.003;
+        Robot_X += 0.005;
+        RobotLX += 0.005;
+        RobotRX += 0.005;
 
         if (Floor_state == 2) {
             for (int i = 0; i < 20; ++i) {
@@ -1312,10 +1341,10 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall3()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true)
                         {
-                            TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.003, 0, 0));
-                            Robot_X -= 0.003;
-                            RobotLX -= 0.003;
-                            RobotRX -= 0.003;
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.005, 0, 0));
+                            Robot_X -= 0.005;
+                            RobotLX -= 0.005;
+                            RobotRX -= 0.005;
                         }
                     }
                 }
@@ -1331,10 +1360,10 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall3()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true)
                         {
-                            TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.003, 0, 0));
-                            Robot_X -= 0.003;
-                            RobotLX -= 0.003;
-                            RobotRX -= 0.003;
+                            TT_Robot = glm::translate(TT_Robot, glm::vec3(-0.005, 0, 0));
+                            Robot_X -= 0.005;
+                            RobotLX -= 0.005;
+                            RobotRX -= 0.005;
                         }
                     }
                 }
@@ -1347,13 +1376,13 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
     }
 }
 
-GLvoid Move(int value) {
+GLvoid Move(int value) { 
     for (int i = 0; i < 8; ++i) {
         MonsterArr[i].MonsterMoving();
     }
     glutTimerFunc(30, Move, 0);
-} 
-int main(int argc, char** argv)
+}  
+int main(int argc, char** argv) 
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GL_DEPTH);
@@ -1374,6 +1403,7 @@ int main(int argc, char** argv)
     make_vertexShaders();
     make_fragmentShaders();
 
+    InitTexture();
     InitBuffer();
     InitMonster();
 
@@ -1391,6 +1421,5 @@ int main(int argc, char** argv)
     //몬스터 자동으로 움직이는 타이머 콜백 함수 
     glutTimerFunc(30, Move, 0); 
 
-
     glutMainLoop();
-}
+} 
