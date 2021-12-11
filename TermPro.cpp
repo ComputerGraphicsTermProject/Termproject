@@ -3,7 +3,8 @@
 #include "stb_image.h"  
 int num_Triangle[2];
 objReader obj[2];
-GLuint VAO[3], VBO_pos[3], VBO_normal[3], VBO_uv[3]; 
+GLuint VAO[3], VBO_pos[3], VBO_normal[3], VBO_uv[3];
+
 //-----------------------------------  
 glm::mat4 CubeModel = glm::mat4(1.0f);
 glm::mat4 MiroModel = glm::mat4(1.0f);
@@ -15,14 +16,18 @@ glm::mat4 RobotModel = glm::mat4(1.0f);
 glm::mat4 MonsterModel = glm::mat4(1.0f);
 glm::mat4 TeleportModel = glm::mat4(1.0f);
 glm::mat4 ExitboxModel = glm::mat4(1.0f);
+glm::mat4 EndingModel = glm::mat4(1.0f);
+glm::mat4 BadEndingModel = glm::mat4(1.0f);
+glm::mat4 GameOverModel = glm::mat4(1.0f);
+
 //-----------------------------------  
-float cx =0.0, cy = 1.0f, cz = 0.01;   
-float c2x = 0.0, c2y = 0.0, c2z = 0.0;  
-glm::vec3 cameraPos = glm::vec3(cx, cy, cz);  
-glm::vec3 cameraDirection = glm::vec3(c2x, c2y, c2z); 
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); 
-GLfloat lightX = 2.0, lightY = 2.0, lightZ = 0.0; 
-GLfloat lightR = 1.0, lightG = 1.0, lightB = 1.0; 
+float cx = 0.0, cy = 0.1f, cz = 0.01;
+float c2x = 0.0, c2y = 0.0, c2z = 0.0;
+glm::vec3 cameraPos = glm::vec3(cx, cy, cz);
+glm::vec3 cameraDirection = glm::vec3(c2x, c2y, c2z);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+GLfloat lightX = 2.0, lightY = 2.0, lightZ = 0.0;
+GLfloat lightR = 1.0, lightG = 1.0, lightB = 1.0;
 //----------------------------------------------
 struct BB {
     float minx;
@@ -73,13 +78,23 @@ BB getbb_monster(float centerx, float centerz)
 }
 BB getbb_robot(float centerx, float centerz)
 {
-    return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);   
+    return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);
 
-} 
+}
 BB getbb_cube(float centerx, float centerz)
 {
     return BB(centerx - 0.025f, centerz - 0.025, centerx + 0.025f, centerz + 0.025);
 }
+BB getbb_teleport(float centerx, float centerz)
+{
+    return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);
+
+}
+BB getbb_exit(float centerx, float centerz)
+{
+    return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);
+}
+
 //미로의 각 중점 구하기 
 float CubeCenterX[20][20];
 float CubeCenterZ[20][20];
@@ -102,12 +117,12 @@ GLvoid GetCenterZ() {
     }
 }
 //------------------------------------------------------------
-
 GLuint texture[7];
 int tLocation;
 GLvoid InitTexture()
 {
     int width[7], height[7], nrChannels[7];
+    //--------------------------------------------------------------------------------------------
     glGenTextures(1, &texture[0]); //--- 텍스처 생성
     glBindTexture(GL_TEXTURE_2D, texture[0]); //--- 텍스처 바인딩 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
@@ -121,8 +136,35 @@ GLvoid InitTexture()
     tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
     glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
     stbi_image_free(data);
+    //-------------------------------------------------                                                                                           //---------------------------------------------------------------------------
+    glGenTextures(1, &texture[1]); //--- 텍스처 생성
+    glBindTexture(GL_TEXTURE_2D, texture[1]); //--- 텍스처 바인딩 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data2 = stbi_load("endingjpg.jpg", &width[1], &height[1], &nrChannels[1], 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, width[1], height[1], 0, GL_RGB, GL_UNSIGNED_BYTE, data2); //---텍스처 이미지 정의
+    glUseProgram(shaderID);
+    tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
+    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
+    stbi_image_free(data2);
+    //---------------------------------------------------------
+    glGenTextures(1, &texture[2]); //--- 텍스처 생성
+    glBindTexture(GL_TEXTURE_2D, texture[2]); //--- 텍스처 바인딩 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data3 = stbi_load("GameOver.jpg", &width[2], &height[2], &nrChannels[2], 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, width[2], height[2], 0, GL_RGB, GL_UNSIGNED_BYTE, data3); //---텍스처 이미지 정의
+    glUseProgram(shaderID);
+    tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
+    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
+    stbi_image_free(data3);
 }
-
 GLvoid InitBuffer() {
     num_Triangle[0] = obj[0].loadObj("Cube.obj");
     glGenVertexArrays(3, VAO);
@@ -142,10 +184,10 @@ GLvoid InitBuffer() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
     glEnableVertexAttribArray(1);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_uv[0]); 
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_uv[0]);
     glBufferData(GL_ARRAY_BUFFER, obj[0].outuv.size() * sizeof(glm::vec3), &obj[0].outuv[0], GL_STATIC_DRAW);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-    glEnableVertexAttribArray(2); 
+    glEnableVertexAttribArray(2);
 
 }
 void UserFunc() {
@@ -236,11 +278,11 @@ GLvoid Pro() {
     //원근 투영 ver 
     glUseProgram(shaderID);
     projection = glm::mat4(1.0f);
-    Angle = glm::radians(40.0f); 
-    projection = glm::perspective(Angle, (float)1000 / (float)1000, 1.0f, 50.0f); 
-    projection = glm::translate(projection, glm::vec3(0.0, 0.0, -2.0)); 
+    Angle = glm::radians(40.0f);
+    projection = glm::perspective(Angle, (float)1000 / (float)1000, 1.0f, 50.0f);
+    projection = glm::translate(projection, glm::vec3(0.0, 0.0, -2.0));
     projectionLocation = glGetUniformLocation(shaderID, "projectionTransform"); //--- 투영 변환 값 설정  
-    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]); 
+    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, &projection[0][0]);
 }
 GLvoid View() {
     glUseProgram(shaderID);
@@ -255,6 +297,8 @@ GLvoid Mountins(int i, int p) {
     glBindVertexArray(VAO[0]);
     InitLight();
     glUniform3f(objColorLocation, 0.3, 0.3, 0.3);
+    glUniform3f(alphaLocation, 1, 1, 1); 
+
 
     MiroModel = glm::mat4(1.0f);
     MiroModel = glm::translate(MiroModel, glm::vec3(MDataArr[i][p].x, 0.3, MDataArr[i][p].z));
@@ -263,12 +307,15 @@ GLvoid Mountins(int i, int p) {
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MiroModel));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
 GLvoid Mountins2(int i, int p) {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
     glUniform3f(objColorLocation, 0.3, 0.3, 0.3);
+    glUniform3f(alphaLocation, 1, 1, 1);
 
     MiroModel2 = glm::mat4(1.0f);
     MiroModel2 = glm::translate(MiroModel2, glm::vec3(MDataArr2[i][p].x, 0.7, MDataArr2[i][p].z)); // 이 값을 바꿔줌 stage2 바닥의 위치 (2층)
@@ -277,24 +324,30 @@ GLvoid Mountins2(int i, int p) {
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MiroModel2));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
 GLvoid Floor() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
-    glUniform3f(objColorLocation, 0.5,0.5,0);  
+    glUniform3f(objColorLocation, 0.5, 0.5, 0);
+    glUniform3f(alphaLocation, 1, 1, 1);
 
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 0.1, 1));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
 GLvoid Floor2() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
-    glUniform3f(objColorLocation, 0,0.5,0.5); 
+    glUniform3f(objColorLocation, 0, 0.5, 0.5);
+    glUniform3f(alphaLocation, 1, 1, 1);
 
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 0.1, 1));
@@ -304,7 +357,8 @@ GLvoid Floor2() {
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
-
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
 //벽면
 GLvoid Wall() {
@@ -312,6 +366,7 @@ GLvoid Wall() {
     glBindVertexArray(VAO[0]);
     InitLight();
     glUniform3f(objColorLocation, 0.5, 0.5, 0.5);
+    glUniform3f(alphaLocation, 1, 1, 1);
     //오른쪽
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::translate(CubeModel, glm::vec3(0.537, 0.5, 0));
@@ -351,94 +406,101 @@ GLvoid Robot() {
     //몸
     RobotModel = glm::mat4(1.0f);
     RobotModel = RobotModel * TJ_Robot * TT_Robot * TR_Robot;
-    RobotModel = glm::translate(RobotModel, glm::vec3(-0.325, 0.52, 0.5));
+    RobotModel = glm::translate(RobotModel, glm::vec3(R_x -0.025, R_y + 0.02, R_z));
     RobotModel = glm::scale(RobotModel, glm::vec3(0.03, 0.03, 0.03));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
     glUniform3f(objColorLocation, 0, 0, 1);
+    glUniform3f(alphaLocation, 1, 1, 1);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //얼굴 
     RobotModel = glm::mat4(1.0f);
     RobotModel = RobotModel * TJ_Robot * TT_Robot * TR_Robot;
-    RobotModel = glm::translate(RobotModel, glm::vec3(-0.325, 0.54, 0.5));
+    RobotModel = glm::translate(RobotModel, glm::vec3(R_x - 0.025, R_y + 0.04, R_z));
     RobotModel = glm::scale(RobotModel, glm::vec3(0.025, 0.025, 0.025));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
     glUniform3f(objColorLocation, 0, 0, 1);
+    glUniform3f(alphaLocation, 1, 1, 1);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     //코
     RobotModel = glm::mat4(1.0f);
     RobotModel = RobotModel * TJ_Robot * TT_Robot * TR_Robot;
-    RobotModel = glm::translate(RobotModel, glm::vec3(-0.325, 0.543, 0.515));
+    RobotModel = glm::translate(RobotModel, glm::vec3(R_x - 0.025, R_y + 0.043, R_z + 0.015));
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.01, 0.01));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
     glUniform3f(objColorLocation, 1, 0, 0);
+    glUniform3f(alphaLocation, 1, 1, 1);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //왼팔 
     Angle = glm::radians(-10.0);
     RobotModel = glm::mat4(1.0f);
     RobotModel = RobotModel * TJ_Robot * TT_Robot * TR_Robot * TlArm;
-    RobotModel = glm::translate(RobotModel, glm::vec3(-0.345, 0.52, 0.51));
+    RobotModel = glm::translate(RobotModel, glm::vec3(R_x - 0.045, R_y + 0.02, R_z + 0.01));
     RobotModel = glm::rotate(RobotModel, Angle, glm::vec3(0, 0, 1));
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.03, 0.005));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
     glUniform3f(objColorLocation, 0.7, 0.2, 0.7);
+    glUniform3f(alphaLocation, 1, 1, 1);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //오른팔 
     Angle = glm::radians(10.0);
     RobotModel = glm::mat4(1.0f);
     RobotModel = RobotModel * TJ_Robot * TT_Robot * TR_Robot * TrArm;
-    RobotModel = glm::translate(RobotModel, glm::vec3(-0.3, 0.52, 0.51));
+    RobotModel = glm::translate(RobotModel, glm::vec3(R_x, R_y + 0.02, R_z + 0.01));
     RobotModel = glm::rotate(RobotModel, Angle, glm::vec3(0, 0, 1));
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.03, 0.005));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
     glUniform3f(objColorLocation, 0.1, 0.8, 0.2);
+    glUniform3f(alphaLocation, 1, 1, 1);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
     //왼다리  
     RobotModel = glm::mat4(1.0f);
     RobotModel = RobotModel * TJ_Robot * TT_Robot * TR_Robot * TlLeg;
-    RobotModel = glm::translate(RobotModel, glm::vec3(-0.338, 0.49, 0.495));
+    RobotModel = glm::translate(RobotModel, glm::vec3(R_x - 0.038, R_y - 0.01, R_z - 0.005));
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.032, 0.01));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
     glUniform3f(objColorLocation, 1, 1, 0);
+    glUniform3f(alphaLocation, 1, 1, 1);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //오른다리  
     RobotModel = glm::mat4(1.0f);
     RobotModel = RobotModel * TJ_Robot * TT_Robot * TR_Robot * TrLeg;
-    RobotModel = glm::translate(RobotModel, glm::vec3(-0.312, 0.49, 0.495));
+    RobotModel = glm::translate(RobotModel, glm::vec3(R_x - 0.012, R_y - 0.01, R_z - 0.005));
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.032, 0.01));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
     glUniform3f(objColorLocation, 1, 1, 0);
+    glUniform3f(alphaLocation, 1, 1, 1);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 //---------------------------------
 class Monster_info {
 public:
-    float MX{}; 
-    float MY{}; 
-    float MZ{}; 
+    float MX{};
+    float MY{};
+    float MZ{};
 
-    float Monster_X{}; 
-    float Monster_Y{}; 
-    float Monster_Z{}; 
+    float Monster_X{};
+    float Monster_Y{};
+    float Monster_Z{};
 
     int floor{};
-    int automoving = 0;  
-    int current = 0; 
-    glm::mat4 TT_Monster = glm::mat4(1.0f);  
-    glm::mat4 TR_Monster = glm::mat4(1.0f);  
-    glm::mat4 TJ_Monster = glm::mat4(1.0f);  
+    int automoving = 0;
+    int current = 0;
+    glm::mat4 TT_Monster = glm::mat4(1.0f);
+    glm::mat4 TR_Monster = glm::mat4(1.0f);
+    glm::mat4 TJ_Monster = glm::mat4(1.0f);
     glm::mat4 MonsterModel = glm::mat4(1.0f);
     GLvoid MonsterMoving() {
         switch (automoving) {
@@ -493,7 +555,7 @@ public:
                             {
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, -0.003));
                                 Monster_Z -= 0.003;
-                                //
+                                Bad_ending = true;
 
                             }
                         }
@@ -523,6 +585,8 @@ public:
                             {
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, -0.003));
                                 Monster_Z -= 0.003;
+                                Bad_ending = true;
+
 
                             }
                         }
@@ -589,6 +653,7 @@ public:
                             {
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, 0.003));
                                 Monster_Z += 0.003;
+                                Bad_ending = true;
 
                             }
 
@@ -619,6 +684,7 @@ public:
                             {
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, 0.003));
                                 Monster_Z += 0.003;
+                                Bad_ending = true;
 
                             }
                         }
@@ -684,6 +750,7 @@ public:
                             {
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(0.003, 0, 0));
                                 Monster_X += 0.003;
+                                Bad_ending = true;
 
                             }
                         }
@@ -714,6 +781,7 @@ public:
                             {
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(0.003, 0, 0));
                                 Monster_X += 0.003;
+                                Bad_ending = true;
 
                             }
                         }
@@ -781,6 +849,7 @@ public:
                             {
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(-0.003, 0, 0));
                                 Monster_X -= 0.003;
+                                Bad_ending = true;
 
                             }
                         }
@@ -810,6 +879,7 @@ public:
                             {
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(-0.003, 0, 0));
                                 Monster_X -= 0.003;
+                                Bad_ending = true;
 
                             }
                         }
@@ -824,6 +894,7 @@ public:
         glUseProgram(shaderID);
         glBindVertexArray(VAO[0]);
         InitLight();
+        glUniform3f(alphaLocation, 1, 1, 1);
         //Body  
         MonsterModel = glm::mat4(1.0f);
         MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
@@ -897,7 +968,6 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 };
-
 Monster_info MonsterArr[8];
 GLvoid InitMonster() {
     for (int i = 0; i < 4; ++i) {
@@ -945,6 +1015,7 @@ GLvoid Teleport() {
     glBindVertexArray(VAO[0]);
     InitLight();
     glUniform3f(objColorLocation, 1.0, 0.0, 0.0);
+    glUniform3f(alphaLocation, 1, 1, 1);
 
     TeleportModel = glm::mat4(1.0f);
     TeleportModel = glm::translate(TeleportModel, glm::vec3(-0.33, 0.475, -0.43));
@@ -952,12 +1023,15 @@ GLvoid Teleport() {
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TeleportModel));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
 GLvoid ExitBox() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
     glUniform3f(objColorLocation, 1.0, 0.0, 0.0);
+    glUniform3f(alphaLocation, 1, 1, 1);
 
     ExitboxModel = glm::mat4(1.0f);
     ExitboxModel = glm::translate(ExitboxModel, glm::vec3(box_x, 0.1, box_z));
@@ -965,40 +1039,102 @@ GLvoid ExitBox() {
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(ExitboxModel));
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+}
+GLvoid EndingBox() {
+    glUseProgram(shaderID);
+    glBindVertexArray(VAO[0]);
+    InitLight();
+    glUniform3f(objColorLocation, 1.0, 1.0, 1.0);
+    glUniform3f(alphaLocation, 1, 1, 1);
+
+    EndingModel = glm::mat4(1.0f);
+    EndingModel = glm::scale(EndingModel, glm::vec3(2.0, 1.0, 2.0));
+    modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(EndingModel));
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+}
+GLvoid GameoverBox() {
+    glUseProgram(shaderID);
+    glBindVertexArray(VAO[0]);
+    InitLight();
+    glUniform3f(objColorLocation, 1.0, 1.0, 1.0);
+    glUniform3f(alphaLocation, 1, 1, 1);
+
+    BadEndingModel = glm::mat4(1.0f);
+    BadEndingModel = glm::scale(BadEndingModel, glm::vec3(1.3, 1.2, 1.0));
+    modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(BadEndingModel));
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture[2]);
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+}
+
+GLvoid BadendingBox() {
+    glUseProgram(shaderID);
+    glBindVertexArray(VAO[0]);
+    InitLight();
+    glUniform3f(objColorLocation, 1.0, 1.0, 1.0);
+    glUniform3f(alphaLocation, 1, 1, 1);
+
+    BadEndingModel = glm::mat4(1.0f);
+    BadEndingModel = glm::scale(BadEndingModel, glm::vec3(1.3, 1.2, 1.4));
+    modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(BadEndingModel));
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture[1]);
+    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
 GLvoid drawScene()
 {
     glClearColor(0, 0, 0, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
 
     Pro();
     View();
-
-    Floor();  
-    for (int i = 0; i < 20; i++) {
-        for (int p = 0; p < 20; p++) {
-            if (Stage1[i][p] == 1) {
-                Mountins(i, p);  
-            } 
-        } 
-    } 
-    Floor2();    
-    for (int i = 0; i < 20; i++) {
-        for (int p = 0; p < 20; p++) {
-            if (Stage2[i][p] == 1) {
-                Mountins2(i, p);
+    if (Bad_ending == false && Happy_ending == false) {
+        if (tel_check == false) {
+            Teleport();
+        }
+        Wall();
+        Robot();
+        ExitBox();
+        Floor();
+        Floor2();
+        for (int i = 0; i < 20; i++) {
+            for (int p = 0; p < 20; p++) {
+                if (Stage1[i][p] == 1) {
+                    Mountins(i, p);
+                }
             }
         }
-    } 
-    Teleport();
-    Wall();
-    Robot();
-    for (int i = 0; i < 8; ++i) { 
-        MonsterArr[i].DrawMonster(); 
+        for (int i = 0; i < 20; i++) {
+            for (int p = 0; p < 20; p++) {
+                if (Stage2[i][p] == 1) {
+                    Mountins2(i, p);
+                }
+            }
+        }
+        for (int i = 0; i < 8; ++i) {
+            MonsterArr[i].DrawMonster();
+        }
     }
-    ExitBox();
+    BadendingBox();
+    GameoverBox();
+    if (Bad_ending) {
+        BadendingBox();
+        GameoverBox();
+    }
+    if (Happy_ending) {
+        EndingBox();
+    }
     glutPostRedisplay();
     glutSwapBuffers();
 }
@@ -1099,6 +1235,9 @@ GLvoid RightLeg(int value) {
 }
 GLvoid myKeyBoard(unsigned char key, int x, int y) {
     switch (key) {
+    case 27:
+        exit(0);
+        break;
     case 's':
         //로봇 앞으로 걷기 
         if (current == 'a') {
@@ -1138,7 +1277,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                             || Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall1()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall2()) == true ||
                             Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall3()) == true ||
-                            Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true) 
+                            Collide(getbb_monster(Robot_X, Robot_Z), getbb_wall4()) == true)
                         {
                             TT_Robot = glm::translate(TT_Robot, glm::vec3(0, 0, -0.005));
                             Robot_Z -= 0.005;
@@ -1147,6 +1286,11 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                         }
                     }
                 }
+            }
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(tel_x, tel_z)) == true) {
+                R_y = 0.1f;
+                Floor_state = 1;
+                tel_check = true;
             }
         }
         else if (Floor_state == 1) {
@@ -1166,6 +1310,9 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                         }
                     }
                 }
+            }
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
+                Happy_ending = true;
             }
         }
         break;
@@ -1225,6 +1372,11 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(tel_x, tel_z)) == true) {
+                R_y = 0.1f;
+                Floor_state = 1;
+                tel_check = true;
+            }
         }
         else if (Floor_state == 1) {
             for (int i = 0; i < 20; ++i) {
@@ -1243,6 +1395,9 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                         }
                     }
                 }
+            }
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
+                Happy_ending = true;
             }
         }
         break;
@@ -1305,6 +1460,11 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(tel_x, tel_z)) == true) {
+                R_y = 0.1f;
+                Floor_state = 1;
+                tel_check = true;
+            }
         }
         else if (Floor_state == 1) {
             for (int i = 0; i < 20; ++i) {
@@ -1324,6 +1484,9 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
+                Happy_ending = true;
+            }
         }
         break;
     case 'd':
@@ -1337,7 +1500,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         }
         else if (current == 's') {
             //회전시킬 것
-            Angle = glm::radians(90.0); 
+            Angle = glm::radians(90.0);
             TR_Robot = glm::translate(TR_Robot, glm::vec3(-0.325, 0.52, 0.5));
             TR_Robot = glm::rotate(TR_Robot, Angle, glm::vec3(0, 1, 0));
             TR_Robot = glm::translate(TR_Robot, glm::vec3(0.325, -0.52, -0.5));
@@ -1382,6 +1545,12 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(tel_x, tel_z)) == true) {
+                R_y = 0.1f;
+                Floor_state = 1;
+                tel_check = true;
+
+            }
         }
         else if (Floor_state == 1) {
             for (int i = 0; i < 20; ++i) {
@@ -1401,6 +1570,9 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                     }
                 }
             }
+            if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
+                Happy_ending = true;
+            }
         }
         break;
     case 'Q':
@@ -1408,14 +1580,13 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         exit(-1);
     }
 }
-
-GLvoid Move(int value) { 
+GLvoid Move(int value) {
     for (int i = 0; i < 8; ++i) {
         MonsterArr[i].MonsterMoving();
     }
     glutTimerFunc(30, Move, 0);
-}  
-int main(int argc, char** argv) 
+}
+int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA | GL_DEPTH);
@@ -1432,19 +1603,23 @@ int main(int argc, char** argv)
     else
         cout << "GLEW Initialized\n";
 
+    if (Game_reset == true) {
+        cout << "??" << endl;
+    }
+    Game_reset = false;
+
+
     UserFunc();
     make_vertexShaders();
     make_fragmentShaders();
 
-    //InitTexture();  
+    InitTexture();  
     InitBuffer();
     InitMonster();
-
     shaderID = make_shaderProgram();
 
     glutDisplayFunc(drawScene);
     glutReshapeFunc(Reshape);
-
     glutKeyboardFunc(myKeyBoard);
     glutTimerFunc(50, LeftArm, 0);
     glutTimerFunc(50, RightArm, 0);
@@ -1452,7 +1627,7 @@ int main(int argc, char** argv)
     glutTimerFunc(50, RightLeg, 0);
 
     //몬스터 자동으로 움직이는 타이머 콜백 함수 
-    glutTimerFunc(30, Move, 0); 
+    glutTimerFunc(30, Move, 0);
 
     glutMainLoop();
-} 
+}

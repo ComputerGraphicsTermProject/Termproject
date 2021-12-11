@@ -22,6 +22,7 @@ unsigned int lightPosLocation;
 unsigned int ViewPosLocation;
 unsigned int objColorLocation;
 unsigned int normalLocation;
+unsigned int alphaLocation;
 GLfloat Angle; //각도  
 
 
@@ -54,7 +55,7 @@ GLchar* vertexShaderSource, * fragmentShaderSource;
 GLuint shaderID;
 
 
-char* filetobuf(const string filename) 
+char* filetobuf(const string filename)
 {
 	ifstream inFile(filename, ios::binary);
 	vector<char> buf;
@@ -72,7 +73,7 @@ char* filetobuf(const string filename)
 }
 GLvoid make_vertexShaders()
 {
-	vertexShaderSource = filetobuf("vertexShader.glsl"); 
+	vertexShaderSource = filetobuf("vertexshaderTex.glsl");
 	vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, (const GLchar**)&vertexShaderSource, 0);
 	glCompileShader(vertexShader);
@@ -86,8 +87,8 @@ GLvoid make_vertexShaders()
 	}
 }
 GLvoid make_fragmentShaders()
-{ 
-	fragmentShaderSource = filetobuf("fragmentShader.glsl");  
+{
+	fragmentShaderSource = filetobuf("fragmentshaderTex.glsl");
 	fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, (const GLchar**)&fragmentShaderSource, 0);
 	glCompileShader(fragmentShader);
@@ -123,6 +124,8 @@ GLuint make_shaderProgram()
 	glUseProgram(ShaderProgramID);
 	return ShaderProgramID;
 }
+
+
 
 int objReader::loadObj(const char* filename)
 {
@@ -405,8 +408,7 @@ GLuint Stage1[20][20] = { 1,0,0,1,1,0,0,0,0,1,0,1,1,0,1,0,1,0,0,0,
 						  0,1,1,1,0,0,1,0,0,1,0,1,0,1,1,1,0,1,1,0,
 						  0,0,0,0,0,1,1,1,0,1,0,1,0,1,0,1,0,0,0,0,
 						  0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
-						  1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,1,1,
-						  0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0 };
+						  1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,1,1, };
 GLuint Stage2[20][20] = { 0,0,1,0,0,0,0,0,0,1,0,1,0,1,0,1,1,0,1,0,
 						  1,0,1,0,1,0,1,0,0,0,0,1,0,1,0,1,0,0,0,0,
 						  1,0,1,1,1,0,1,1,1,1,0,1,0,1,0,1,0,1,0,1,
@@ -428,6 +430,46 @@ GLuint Stage2[20][20] = { 0,0,1,0,0,0,0,0,0,1,0,1,0,1,0,1,1,0,1,0,
 						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						  1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0 };
 
+//GLuint Stage1[20][20] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+//GLuint Stage2[20][20] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+//						  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
 
 //로봇& 몬스터에 필요한 데이터 
 glm::mat4 TlLeg = glm::mat4(1.0f); //Robot 왼쪽 다리 변환      
@@ -440,11 +482,11 @@ glm::mat4 TR_Robot = glm::mat4(1.0f); //Robot전체 회전
 glm::mat4 TJ_Robot = glm::mat4(1.0f); //Robot전체 점프
 
 glm::mat4 TT_Monster[8];
-glm::mat4 TR_Monster[8]; 
-glm::mat4 TJ_Monster[8]; 
+glm::mat4 TR_Monster[8];
+glm::mat4 TJ_Monster[8];
 
 
-glm::mat4 location = glm::mat4(1.0f); 
+glm::mat4 location = glm::mat4(1.0f);
 //-------------------------------------------------------------
 
 float moving1, moving2, moving3, moving4;
@@ -472,8 +514,12 @@ GLfloat exit_z = 0.0f;
 GLfloat box_x = -0.26f;
 GLfloat box_z = 0.43f;
 GLfloat R_y = 0.5f;
+GLfloat R_x = -0.3;
+GLfloat R_z = 0.5;
 //GLfloat R_y = 0.1f;
 
 // 로봇 y좌표값및 이동값
 bool Bad_ending = false;
-bool Happy_ending = false;  
+bool Happy_ending = false;
+bool Game_reset = false;
+bool tel_check = false;
