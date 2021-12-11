@@ -517,9 +517,12 @@ GLfloat R_y = 0.5f;
 GLfloat R_x = -0.3;
 GLfloat R_z = 0.5;
 //GLfloat R_y = 0.1f;
-
+GLfloat Clearness = 0.0f;
+GLfloat happy_z = 0.8f;
 // ·Îº¿ yÁÂÇ¥°ª¹× ÀÌµ¿°ª
 bool Bad_ending = false;
 bool Happy_ending = false;
 bool Game_reset = false;
 bool tel_check = false;
+bool over_check = false;
+bool happy_check = false;

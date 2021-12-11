@@ -117,11 +117,11 @@ GLvoid GetCenterZ() {
     }
 }
 //------------------------------------------------------------
-GLuint texture[7];
+GLuint texture[10];
 int tLocation;
 GLvoid InitTexture()
 {
-    int width[7], height[7], nrChannels[7];
+    int width[10], height[10], nrChannels[10];
     //--------------------------------------------------------------------------------------------
     glGenTextures(1, &texture[0]); //--- 텍스처 생성
     glBindTexture(GL_TEXTURE_2D, texture[0]); //--- 텍스처 바인딩 
@@ -130,7 +130,7 @@ GLvoid InitTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* data = stbi_load("sky.bmp", &width[0], &height[0], &nrChannels[0], 0);
+    unsigned char* data = stbi_load("plyaercolor.jpg", &width[0], &height[0], &nrChannels[0], 0);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, width[0], height[0], 0, GL_RGB, GL_UNSIGNED_BYTE, data); //---텍스처 이미지 정의
     glUseProgram(shaderID);
     tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
@@ -192,6 +192,76 @@ GLvoid InitTexture()
     tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
     glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
     stbi_image_free(data5);
+    //---------------------------------------------------------
+    glGenTextures(1, &texture[5]); //--- 텍스처 생성
+    glBindTexture(GL_TEXTURE_2D, texture[5]); //--- 텍스처 바인딩 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data6 = stbi_load("tile.jpg", &width[5], &height[5], &nrChannels[5], 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, width[5], height[5], 0, GL_RGB, GL_UNSIGNED_BYTE, data6); //---텍스처 이미지 정의
+    glUseProgram(shaderID);
+    tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
+    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
+    stbi_image_free(data6);
+    //-------------------------------------------------------------
+    glGenTextures(1, &texture[6]); //--- 텍스처 생성
+    glBindTexture(GL_TEXTURE_2D, texture[6]); //--- 텍스처 바인딩 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data7 = stbi_load("Face.jpg", &width[6], &height[6], &nrChannels[6], 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, width[6], height[6], 0, GL_RGB, GL_UNSIGNED_BYTE, data7); //---텍스처 이미지 정의
+    glUseProgram(shaderID);
+    tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
+    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
+    stbi_image_free(data7);
+    //------------------------------------------------------------------------
+    glGenTextures(1, &texture[7]); //--- 텍스처 생성
+    glBindTexture(GL_TEXTURE_2D, texture[7]); //--- 텍스처 바인딩 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data8 = stbi_load("Happy.jpg", &width[7], &height[7], &nrChannels[7], 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, width[7], height[7], 0, GL_RGB, GL_UNSIGNED_BYTE, data8); //---텍스처 이미지 정의
+    glUseProgram(shaderID);
+    tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
+    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
+    stbi_image_free(data8);
+    //--------------------------------------------------------------------------
+    glGenTextures(1, &texture[8]); //--- 텍스처 생성
+    glBindTexture(GL_TEXTURE_2D, texture[8]); //--- 텍스처 바인딩 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data9 = stbi_load("Face.jpg", &width[8], &height[8], &nrChannels[8], 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, width[8], height[8], 0, GL_RGB, GL_UNSIGNED_BYTE, data9); //---텍스처 이미지 정의
+    glUseProgram(shaderID);
+    tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
+    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
+    stbi_image_free(data9);
+    //------------------------------------------------------------------------
+    glGenTextures(1, &texture[9]); //--- 텍스처 생성
+    glBindTexture(GL_TEXTURE_2D, texture[9]); //--- 텍스처 바인딩 
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //--- 현재 바인딩된 텍스처의 파라미터 설정하기
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char* data10 = stbi_load("white.jpg", &width[9], &height[9], &nrChannels[9], 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, width[9], height[9], 0, GL_RGB, GL_UNSIGNED_BYTE, data10); //---텍스처 이미지 정의
+    glUseProgram(shaderID);
+    tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
+    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정
+    stbi_image_free(data10);
 }
 GLvoid InitBuffer() {
     num_Triangle[0] = obj[0].loadObj("Cube.obj");
@@ -324,9 +394,7 @@ GLvoid Mountins(int i, int p) {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
-    glUniform3f(objColorLocation, 1, 1, 1);
-    glUniform3f(alphaLocation, 1, 1, 1);
-
+    glUniform3f(objColorLocation, 0.6, 0.6, 0.6);
 
     MiroModel = glm::mat4(1.0f);
     MiroModel = glm::translate(MiroModel, glm::vec3(MDataArr[i][p].x, 0.3, MDataArr[i][p].z));
@@ -334,8 +402,6 @@ GLvoid Mountins(int i, int p) {
     MiroModel = glm::translate(MiroModel, glm::vec3(0, -0.3, 0));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MiroModel));
-    glActiveTexture(GL_TEXTURE0);
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     glBindTexture(GL_TEXTURE_2D, texture[3]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
@@ -343,8 +409,7 @@ GLvoid Mountins2(int i, int p) {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
-    glUniform3f(objColorLocation, 1, 1, 1);
-    glUniform3f(alphaLocation, 1, 1, 1);
+    glUniform3f(objColorLocation, 0.6, 0.6, 0.6);
 
     MiroModel2 = glm::mat4(1.0f);
     MiroModel2 = glm::translate(MiroModel2, glm::vec3(MDataArr2[i][p].x, 0.7, MDataArr2[i][p].z)); // 이 값을 바꿔줌 stage2 바닥의 위치 (2층)
@@ -352,8 +417,6 @@ GLvoid Mountins2(int i, int p) {
     MiroModel2 = glm::translate(MiroModel2, glm::vec3(0, -0.3, 0));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MiroModel2));
-    glActiveTexture(GL_TEXTURE0);
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     glBindTexture(GL_TEXTURE_2D, texture[3]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
@@ -361,36 +424,31 @@ GLvoid Floor() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
-    glUniform3f(objColorLocation, 1, 1, 1);
-    glUniform3f(alphaLocation, 1, 1, 1);
+    glUniform3f(objColorLocation, 0.2, 0.2, 0.2);
 
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 0.1, 1));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
-    glActiveTexture(GL_TEXTURE0);
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
-    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glBindTexture(GL_TEXTURE_2D, texture[5]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
 GLvoid Floor2() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
-    glUniform3f(objColorLocation, 0, 0, 0);
-    glUniform3f(alphaLocation, 1, 1, 1);
+    glUniform3f(objColorLocation, 0.2, 0.2, 0.2);
 
     CubeModel = glm::mat4(1.0f);
-    CubeModel = glm::translate(CubeModel, glm::vec3(0.0, 4.1, 0)); // y값 4.1로 수정 (2층) 
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 0.1, 1));
-
+    CubeModel = glm::translate(CubeModel, glm::vec3(0.0, 4.1, 0)); // y값 4.1로 수정 (2층)
 
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
-    glActiveTexture(GL_TEXTURE0);
+
+    glBindTexture(GL_TEXTURE_2D, texture[5]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindTexture(GL_TEXTURE_2D, texture[0]);
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+
 }
 //벽면
 GLvoid Wall() {
@@ -407,7 +465,6 @@ GLvoid Wall() {
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
     glBindTexture(GL_TEXTURE_2D, texture[4]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
     //왼쪽  
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::translate(CubeModel, glm::vec3(-0.537, 0.5, 0));
@@ -416,7 +473,6 @@ GLvoid Wall() {
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
     glBindTexture(GL_TEXTURE_2D, texture[4]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
     //아래 
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::translate(CubeModel, glm::vec3(0, 0.5, 0.537));
@@ -425,7 +481,6 @@ GLvoid Wall() {
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
     glBindTexture(GL_TEXTURE_2D, texture[4]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //위
     CubeModel = glm::mat4(1.0f);
@@ -435,7 +490,6 @@ GLvoid Wall() {
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
     glBindTexture(GL_TEXTURE_2D, texture[4]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 GLvoid Robot() {
     glUseProgram(shaderID);
@@ -448,8 +502,9 @@ GLvoid Robot() {
     RobotModel = glm::scale(RobotModel, glm::vec3(0.03, 0.03, 0.03));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
-    glUniform3f(objColorLocation, 0, 0, 1);
+    glUniform3f(objColorLocation, 1, 1, 1);
     glUniform3f(alphaLocation, 1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //얼굴 
@@ -459,8 +514,9 @@ GLvoid Robot() {
     RobotModel = glm::scale(RobotModel, glm::vec3(0.025, 0.025, 0.025));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
-    glUniform3f(objColorLocation, 0, 0, 1);
+    glUniform3f(objColorLocation, 1, 1, 1);
     glUniform3f(alphaLocation, 1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     //코
     RobotModel = glm::mat4(1.0f);
@@ -469,8 +525,9 @@ GLvoid Robot() {
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.01, 0.01));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
-    glUniform3f(objColorLocation, 1, 0, 0);
+    glUniform3f(objColorLocation, 1, 1, 1);
     glUniform3f(alphaLocation, 1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //왼팔 
@@ -482,8 +539,9 @@ GLvoid Robot() {
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.03, 0.005));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
-    glUniform3f(objColorLocation, 0.7, 0.2, 0.7);
+    glUniform3f(objColorLocation, 1, 1, 1);
     glUniform3f(alphaLocation, 1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //오른팔 
@@ -495,8 +553,9 @@ GLvoid Robot() {
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.03, 0.005));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
-    glUniform3f(objColorLocation, 0.1, 0.8, 0.2);
+    glUniform3f(objColorLocation, 1, 1, 1);
     glUniform3f(alphaLocation, 1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
 
@@ -509,6 +568,7 @@ GLvoid Robot() {
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
     glUniform3f(objColorLocation, 1, 1, 0);
     glUniform3f(alphaLocation, 1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     //오른다리  
@@ -518,8 +578,9 @@ GLvoid Robot() {
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.032, 0.01));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(RobotModel));
-    glUniform3f(objColorLocation, 1, 1, 0);
+    glUniform3f(objColorLocation, 1, 1, 1);
     glUniform3f(alphaLocation, 1, 1, 1);
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 //---------------------------------
@@ -624,8 +685,6 @@ public:
                                 TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, -0.003));
                                 Monster_Z -= 0.003;
                                 Bad_ending = true;
-
-
                             }
                         }
                     }
@@ -940,7 +999,9 @@ public:
         MonsterModel = glm::scale(MonsterModel, glm::vec3(0.03, 0.03, 0.03));
         modelLocation = glGetUniformLocation(shaderID, "modelTransform");
         glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 0, 0);
+        glUniform3f(objColorLocation, 1, 1, 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture[9]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         //face
         MonsterModel = glm::mat4(1.0f);
@@ -949,8 +1010,10 @@ public:
         MonsterModel = glm::scale(MonsterModel, glm::vec3(0.025, 0.025, 0.025));
         modelLocation = glGetUniformLocation(shaderID, "modelTransform");
         glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 0, 0);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glUniform3f(objColorLocation, 1, 1, 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture[6]);
+        glDrawArrays(GL_TRIANGLES, 6, 6);
         //nose
         MonsterModel = glm::mat4(1.0f);
         MonsterModel = MonsterModel * TJ_Monster * TT_Monster * TR_Monster;
@@ -958,7 +1021,9 @@ public:
         MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.01, 0.01));
         modelLocation = glGetUniformLocation(shaderID, "modelTransform");
         glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
+        glUniform3f(objColorLocation, 1, 1, 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture[9]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         //left Arm
@@ -970,7 +1035,9 @@ public:
         MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.03, 0.005));
         modelLocation = glGetUniformLocation(shaderID, "modelTransform");
         glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
+        glUniform3f(objColorLocation, 1, 1, 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture[9]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         //right Arm
@@ -982,7 +1049,9 @@ public:
         MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.03, 0.005));
         modelLocation = glGetUniformLocation(shaderID, "modelTransform");
         glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
+        glUniform3f(objColorLocation, 1, 1, 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture[9]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         //left Leg
@@ -992,7 +1061,9 @@ public:
         MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.032, 0.01));
         modelLocation = glGetUniformLocation(shaderID, "modelTransform");
         glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
+        glUniform3f(objColorLocation, 1, 1, 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture[9]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         //right Leg  
@@ -1002,7 +1073,9 @@ public:
         MonsterModel = glm::scale(MonsterModel, glm::vec3(0.01, 0.032, 0.01));
         modelLocation = glGetUniformLocation(shaderID, "modelTransform");
         glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(MonsterModel));
-        glUniform3f(objColorLocation, 1, 1, 0);
+        glUniform3f(objColorLocation, 1, 1, 1);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture[9]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 };
@@ -1060,7 +1133,6 @@ GLvoid Teleport() {
     TeleportModel = glm::scale(TeleportModel, glm::vec3(0.03, 0.03, 0.03));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(TeleportModel));
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     glBindTexture(GL_TEXTURE_2D, texture[0]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
@@ -1076,7 +1148,6 @@ GLvoid ExitBox() {
     ExitboxModel = glm::scale(ExitboxModel, glm::vec3(0.03, 0.03, 0.03));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(ExitboxModel));
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     glBindTexture(GL_TEXTURE_2D, texture[0]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
@@ -1089,47 +1160,31 @@ GLvoid EndingBox() {
 
     EndingModel = glm::mat4(1.0f);
     EndingModel = glm::scale(EndingModel, glm::vec3(2.0, 1.0, 2.0));
+    EndingModel = glm::translate(EndingModel, glm::vec3(0.0, 0.0, happy_z));
+
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(EndingModel));
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
-    glBindTexture(GL_TEXTURE_2D, texture[0]);
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
-}
+    glBindTexture(GL_TEXTURE_2D, texture[7]);
+    glDrawArrays(GL_TRIANGLES, 24, 6);
 
-//GLvoid GameoverBox() {
-//    glUseProgram(shaderID);
-//    glBindVertexArray(VAO[0]);
-//    InitLight();
-//    glUniform3f(objColorLocation, 1.0, 1.0, 1.0);
-//    glUniform3f(alphaLocation, Clearness, Clearness, Clearness);
-//
-//    BadEndingModel = glm::mat4(1.0f);
-//    BadEndingModel = glm::translate(BadEndingModel, glm::vec3(0, 1, 0));
-//    BadEndingModel = glm::scale(BadEndingModel, glm::vec3(1.1, 0.1, 1.1));
-//
-//    modelLocation = glGetUniformLocation(shaderID, "modelTransform");
-//    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(BadEndingModel));
-//    glActiveTexture(GL_TEXTURE0);
-//    glBindTexture(GL_TEXTURE_2D, texture[2]);
-//    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
-//}
+}
 GLvoid GameoverBox() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
     glUniform3f(objColorLocation, 1.0, 1.0, 1.0);
-    glUniform3f(alphaLocation, 1.0, 1.0, 1.0);
+    glUniform3f(alphaLocation, Clearness, Clearness, Clearness);
 
     BadEndingModel = glm::mat4(1.0f);
-    BadEndingModel = glm::translate(BadEndingModel, glm::vec3(0, 1, 0));
-    BadEndingModel = glm::scale(BadEndingModel, glm::vec3(1.1, 0.1, 1.1));
+    BadEndingModel = glm::scale(BadEndingModel, glm::vec3(2.2, 0.1, 2.0));
+    BadEndingModel = glm::translate(BadEndingModel, glm::vec3(0.0, 0.0, -0.07));
 
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(BadEndingModel));
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture[2]);
-    //제일 윗면  
-    glDrawArrays(GL_TRIANGLES, 6, 6);
+    //제일 윗면   
+    glDrawArrays(GL_TRIANGLES, 24, 6);
 }
 GLvoid BadendingBox() {
     glUseProgram(shaderID);
@@ -1139,7 +1194,7 @@ GLvoid BadendingBox() {
     glUniform3f(alphaLocation, 1, 1, 1);
 
     BadEndingModel = glm::mat4(1.0f);
-    BadEndingModel = glm::scale(BadEndingModel, glm::vec3(1.3, 0.1, 1.4));
+    BadEndingModel = glm::scale(BadEndingModel, glm::vec3(2.5, 0.1, 2.5));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(BadEndingModel));
     glActiveTexture(GL_TEXTURE0);
@@ -1185,14 +1240,21 @@ GLvoid drawScene()
         }
 
     }
+
     if (Bad_ending) {
         BadendingBox();
         GameoverBox();
         over_check = true;
+        EndingBox();
+        happy_check = true;
     }
+
     if (Happy_ending) {
         EndingBox();
+        happy_check = true;
+        cout << happy_check << endl;
     }
+
     glutPostRedisplay();
     glutSwapBuffers();
 }
@@ -1200,7 +1262,6 @@ GLvoid Reshape(int w, int h)
 {
     glViewport(0, 0, w, h);
 }
-
 //로봇 팔 다리 움직이는 코드 
 GLvoid LeftArm(int value) {
     if (leftArmtype == 0) {
@@ -1647,6 +1708,13 @@ GLvoid Move(int value) {
 GLvoid TimerFunction(int value) {
     if (over_check) {
         Clearness += 0.01f;
+    }
+    if (happy_check) {
+        happy_z -= 0.01f;
+        if (happy_z < 0.0) {
+            happy_check = false;
+            happy_z = 0.0f;
+        }
     }
     glutTimerFunc(50, TimerFunction, 1);
     glutPostRedisplay();
