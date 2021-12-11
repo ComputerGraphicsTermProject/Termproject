@@ -400,32 +400,32 @@ GLvoid Wall() {
     glUniform3f(objColorLocation, 1, 1, 1);
     glUniform3f(alphaLocation, 1, 1, 1);
     //오른쪽
-    CubeModel = glm::mat4(1.0f);
+    CubeModel = glm::mat4(1.0f); glBindTexture(GL_TEXTURE_2D, texture[4]); glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     CubeModel = glm::translate(CubeModel, glm::vec3(0.537, 0.5, 0));
     CubeModel = glm::scale(CubeModel, glm::vec3(0.05, 1, 1.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
+    glBindTexture(GL_TEXTURE_2D, texture[4]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindTexture(GL_TEXTURE_2D, texture[4]);
     //왼쪽  
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::translate(CubeModel, glm::vec3(-0.537, 0.5, 0));
     CubeModel = glm::scale(CubeModel, glm::vec3(0.05, 1, 1.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
+    glBindTexture(GL_TEXTURE_2D, texture[4]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindTexture(GL_TEXTURE_2D, texture[4]);
     //아래 
     CubeModel = glm::mat4(1.0f);
     CubeModel = glm::translate(CubeModel, glm::vec3(0, 0.5, 0.537));
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 1, 0.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
+    glBindTexture(GL_TEXTURE_2D, texture[4]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindTexture(GL_TEXTURE_2D, texture[4]);
 
     //위
     CubeModel = glm::mat4(1.0f);
@@ -433,9 +433,9 @@ GLvoid Wall() {
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 1, 0.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
+    glBindTexture(GL_TEXTURE_2D, texture[4]);
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     glDrawArrays(GL_TRIANGLES, 0, 36);
-    glBindTexture(GL_TEXTURE_2D, texture[4]);
 }
 GLvoid Robot() {
     glUseProgram(shaderID);
@@ -1096,12 +1096,29 @@ GLvoid EndingBox() {
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
 }
 
+//GLvoid GameoverBox() {
+//    glUseProgram(shaderID);
+//    glBindVertexArray(VAO[0]);
+//    InitLight();
+//    glUniform3f(objColorLocation, 1.0, 1.0, 1.0);
+//    glUniform3f(alphaLocation, Clearness, Clearness, Clearness);
+//
+//    BadEndingModel = glm::mat4(1.0f);
+//    BadEndingModel = glm::translate(BadEndingModel, glm::vec3(0, 1, 0));
+//    BadEndingModel = glm::scale(BadEndingModel, glm::vec3(1.1, 0.1, 1.1));
+//
+//    modelLocation = glGetUniformLocation(shaderID, "modelTransform");
+//    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(BadEndingModel));
+//    glActiveTexture(GL_TEXTURE0);
+//    glBindTexture(GL_TEXTURE_2D, texture[2]);
+//    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+//}
 GLvoid GameoverBox() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
     glUniform3f(objColorLocation, 1.0, 1.0, 1.0);
-    glUniform3f(alphaLocation, Clearness, Clearness, Clearness);
+    glUniform3f(alphaLocation, 1.0, 1.0, 1.0);
 
     BadEndingModel = glm::mat4(1.0f);
     BadEndingModel = glm::translate(BadEndingModel, glm::vec3(0, 1, 0));
@@ -1111,9 +1128,9 @@ GLvoid GameoverBox() {
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(BadEndingModel));
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture[2]);
-    glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
+    //제일 윗면  
+    glDrawArrays(GL_TRIANGLES, 6, 6);
 }
-
 GLvoid BadendingBox() {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
