@@ -1,6 +1,9 @@
-#define STB_IMAGE_IMPLEMENTATION 
-#include "TermPro.h"
-#include "stb_image.h"    
+#define STB_IMAGE_IMPLEMENTATION     
+#include "TermPro.h"             
+#include "stb_image.h"     
+#include <mmsystem.h> 
+#pragma comment(lib, "winmm.lib")   
+
 int num_Triangle[2];
 objReader obj[2];
 GLuint VAO[3], VBO_pos[3], VBO_normal[3], VBO_uv[3];
@@ -12,8 +15,8 @@ glm::vec3 cameraPos = glm::vec3(cx, cy, cz);
 glm::vec3 cameraDirection = glm::vec3(c2x, c2y, c2z); 
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 GLfloat lightX = 2.0, lightY = 2.0, lightZ = 0.0; 
-GLfloat lightR = 1.0, lightG = 1.0, lightB = 1.0; 
-//----------------------------------------------
+GLfloat lightR = 1.0, lightG = 1.0, lightB = 1.0;  
+//---------------------------------------------- 
 struct BB {
     float minx;
     float minz;
@@ -50,7 +53,7 @@ BB getbb_wall2() {
 }  
 //위
 BB getbb_wall3() {
-    return BB(-1.0f, -0.55f, 1.0f, -0.49f);
+    return BB(-1.0f, -0.55f, 1.0f, -0.5f);  
 }  
 //아래 
 BB getbb_wall4() {
@@ -60,11 +63,10 @@ BB getbb_monster(float centerx, float centerz)
 {
     return BB(centerx - 0.015f, centerz - 0.015, centerx + 0.015f, centerz + 0.015f);
 
-}
+} 
 BB getbb_robot(float centerx, float centerz)
 {
-    return BB(centerx - 0.015f, centerz - 0.015f, centerx + 0.015f, centerz + 0.015f);
-
+    return BB(centerx - 0.015f, centerz-0.005, centerx + 0.015f, centerz + 0.03f);    
 }
 BB getbb_cube(float centerx, float centerz)
 {
@@ -93,12 +95,12 @@ GLvoid GetCenterX() {
             CubeCenterX[i][p] = -0.475 + (0.05 * p);
         }
     }
-}
-GLvoid GetCenterZ() {
-    for (int p = 0; p < 20; ++p) {
-        for (int i = 0; i < 20; ++i) {
-            CubeCenterZ[i][p] = -0.475 + (0.05 * i);
-        }
+} 
+GLvoid GetCenterZ() {  
+    for (int i = 0; i < 20; ++i) {
+        for (int p = 0; p < 20; ++p) {  
+            CubeCenterZ[i][p] = -0.475 + (0.05 * i);    
+        }  
     }
 }
 //------------------------------------------------------------
@@ -185,7 +187,7 @@ GLvoid InitTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     stbi_set_flip_vertically_on_load(true); 
-    unsigned char* data7 = stbi_load("monsterTest.jpg", &width[6], &height[6], &nrChannels[6], 0);
+    unsigned char* data7 = stbi_load("Monster.jpg", &width[6], &height[6], &nrChannels[6], 0);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, width[6], height[6], 0, GL_RGB, GL_UNSIGNED_BYTE, data7); //---텍스처 이미지 정의
     glUseProgram(shaderID); 
     tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
@@ -235,7 +237,7 @@ GLvoid InitTexture()
     stbi_image_free(data10); 
 }
 GLvoid InitBuffer() {
-    num_Triangle[0] = obj[0].loadObj("Cube2.obj");
+    num_Triangle[0] = obj[0].loadObj("Cube.obj"); 
     glGenVertexArrays(3, VAO);
     glGenBuffers(3, VBO_pos);
     glGenBuffers(3, VBO_normal);
@@ -516,7 +518,7 @@ GLvoid Robot() {
     Angle = glm::radians(10.0);
     RobotModel = glm::mat4(1.0f);
     RobotModel = RobotModel * TJ_Robot * TT_Robot * TR_Robot * TrArm;
-    RobotModel = glm::translate(RobotModel, glm::vec3(R_x, R_y + 0.02, R_z + 0.01));
+    RobotModel = glm::translate(RobotModel, glm::vec3(R_x-0.005, R_y + 0.02, R_z + 0.01));
     RobotModel = glm::rotate(RobotModel, Angle, glm::vec3(0, 0, 1));
     RobotModel = glm::scale(RobotModel, glm::vec3(0.01, 0.03, 0.005));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
@@ -1415,6 +1417,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         c2x = Robot_X, c2y = Robot_Y + 0.3, c2z = Robot_Z;
         cameraPos = glm::vec3(cx, cy, cz);
         cameraDirection = glm::vec3(c2x, c2y, c2z);
+   
         break;
     case 'w':
         //로봇 뒤로 걷기 
@@ -1736,6 +1739,7 @@ int main(int argc, char** argv)
     else
         cout << "GLEW Initialized\n";
 
+    PlaySound(L"배경음.wav", 0, SND_FILENAME|SND_ASYNC|SND_LOOP);    
 
     UserFunc();
     make_vertexShaders();
