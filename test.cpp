@@ -2,7 +2,76 @@
 #include "TermPro.h"             
 #include "stb_image.h"     
 #include <mmsystem.h> 
-#pragma comment(lib, "winmm.lib")   
+#include <Windows.h>
+
+#pragma comment(lib, "winmm.lib")    
+#include "Mmsystem.h"
+#include "Digitalv.h"
+MCI_OPEN_PARMS m_mciOpenParms;
+MCI_PLAY_PARMS m_mciPlayParms;
+DWORD m_dwDeviceID;
+MCI_OPEN_PARMS mciOpen;
+MCI_PLAY_PARMS mciPlay;
+
+int dwID;
+
+//Sound
+GLvoid background_Sound() {
+    mciOpen.lpstrElementName = L"배경음.wav"; // 파일 경로 입력 
+    mciOpen.lpstrDeviceType = L"mpegvideo";
+
+    mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
+        (DWORD)(LPVOID)&mciOpen);
+
+    dwID = mciOpen.wDeviceID;
+    mciSendCommand(dwID, MCI_PLAY, MCI_DGV_PLAY_REPEAT, // play & repeat
+        (DWORD)(LPVOID)&m_mciPlayParms);
+}
+GLvoid scream_Sound() { 
+
+    mciOpen.lpstrElementName = L"비명소리.wav"; // 파일 경로 입력  
+    mciOpen.lpstrDeviceType = L"mpegvideo";
+
+    int Sound1 = mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
+        (DWORD)(LPVOID)&mciOpen);
+
+    dwID = mciOpen.wDeviceID;
+    mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, // play & repeat   
+        (DWORD)(LPVOID)&m_mciPlayParms);
+}
+GLvoid scream_background_Sound() {
+    mciOpen.lpstrElementName = L"배경음악.wav"; // 파일 경로 입력  
+    mciOpen.lpstrDeviceType = L"mpegvideo";
+
+    int Sound1 = mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
+        (DWORD)(LPVOID)&mciOpen);
+
+    dwID = mciOpen.wDeviceID;
+    mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, // play & repeat   
+        (DWORD)(LPVOID)&m_mciPlayParms);
+}
+GLvoid Down_Sound() {
+    mciOpen.lpstrElementName = L"슉.wav"; // 파일 경로 입력    
+    mciOpen.lpstrDeviceType = L"mpegvideo";
+
+    int Sound1 = mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
+        (DWORD)(LPVOID)&mciOpen);
+
+    dwID = mciOpen.wDeviceID;
+    mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, // play & repeat   
+        (DWORD)(LPVOID)&m_mciPlayParms);
+}
+GLvoid win_Sound() { 
+    mciOpen.lpstrElementName = L"탈출.wav"; // 파일 경로 입력    
+    mciOpen.lpstrDeviceType = L"mpegvideo";
+
+    int Sound1 = mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
+        (DWORD)(LPVOID)&mciOpen);
+
+    dwID = mciOpen.wDeviceID;
+    mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, // play & repeat   
+        (DWORD)(LPVOID)&m_mciPlayParms);
+}
 
 int num_Triangle[2];
 objReader obj[2];
@@ -14,8 +83,8 @@ float c2x = Robot_X, c2y = Robot_Y + 0.3, c2z = Robot_Z;
 glm::vec3 cameraPos = glm::vec3(cx, cy, cz);
 glm::vec3 cameraDirection = glm::vec3(c2x, c2y, c2z); 
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-GLfloat lightX = 2.0, lightY = 2.0, lightZ = 0.0; 
-GLfloat lightR = 1.0, lightG = 1.0, lightB = 1.0;  
+GLfloat lightX = 0.0, lightY = 10.0, lightZ = 0.0; 
+GLfloat lightR = 0.5, lightG =0.5, lightB = 0.5;  
 //---------------------------------------------- 
 struct BB {
     float minx;
@@ -432,7 +501,7 @@ GLvoid Wall() {
     glUniform3f(alphaLocation, 1, 1, 1);
     //오른쪽
     CubeModel = glm::mat4(1.0f); glBindTexture(GL_TEXTURE_2D, texture[4]); glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
-    CubeModel = glm::translate(CubeModel, glm::vec3(0.537, 0.5, 0));
+    CubeModel = glm::translate(CubeModel, glm::vec3(0.53, 0.5, 0));
     CubeModel = glm::scale(CubeModel, glm::vec3(0.05, 1, 1.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
@@ -440,7 +509,7 @@ GLvoid Wall() {
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     //왼쪽  
     CubeModel = glm::mat4(1.0f);
-    CubeModel = glm::translate(CubeModel, glm::vec3(-0.537, 0.5, 0));
+    CubeModel = glm::translate(CubeModel, glm::vec3(-0.53, 0.5, 0));
     CubeModel = glm::scale(CubeModel, glm::vec3(0.05, 1, 1.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
@@ -448,7 +517,7 @@ GLvoid Wall() {
     glDrawArrays(GL_TRIANGLES, 0, num_Triangle[0]);
     //아래 
     CubeModel = glm::mat4(1.0f);
-    CubeModel = glm::translate(CubeModel, glm::vec3(0, 0.5, 0.537));
+    CubeModel = glm::translate(CubeModel, glm::vec3(0, 0.5, 0.53));
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 1, 0.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
@@ -457,7 +526,7 @@ GLvoid Wall() {
 
     //위
     CubeModel = glm::mat4(1.0f);
-    CubeModel = glm::translate(CubeModel, glm::vec3(0, 0.5, -0.537));
+    CubeModel = glm::translate(CubeModel, glm::vec3(0, 0.5, -0.53));
     CubeModel = glm::scale(CubeModel, glm::vec3(1, 1, 0.05));
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(CubeModel));
@@ -626,7 +695,8 @@ public:
                                     TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, -0.003));
                                     Monster_Z -= 0.003;
                                     Bad_ending = true;
-
+                                    scream_Sound();
+                                    scream_background_Sound();
                                 }
                             }
                         }
@@ -656,6 +726,8 @@ public:
                                     TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, -0.003));
                                     Monster_Z -= 0.003;
                                     Bad_ending = true;
+                                    scream_Sound();
+                                    scream_background_Sound();
                                 }
                             }
                         }
@@ -722,6 +794,8 @@ public:
                                     TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, 0.003));
                                     Monster_Z += 0.003;
                                     Bad_ending = true;
+                                    scream_Sound();
+                                    scream_background_Sound();
                                 }
 
                             }
@@ -752,6 +826,8 @@ public:
                                     TT_Monster = glm::translate(TT_Monster, glm::vec3(0, 0, 0.003));
                                     Monster_Z += 0.003;
                                     Bad_ending = true;
+                                    scream_Sound();
+                                    scream_background_Sound();
                                 }
                             }
                         }
@@ -817,6 +893,8 @@ public:
                                     TT_Monster = glm::translate(TT_Monster, glm::vec3(0.003, 0, 0));
                                     Monster_X += 0.003;
                                     Bad_ending = true;
+                                    scream_Sound();
+                                    scream_background_Sound();
 
                                 }
                             }
@@ -848,7 +926,8 @@ public:
                                     TT_Monster = glm::translate(TT_Monster, glm::vec3(0.003, 0, 0));
                                     Monster_X += 0.003;
                                     Bad_ending = true;
-
+                                    scream_Sound();
+                                    scream_background_Sound();
                                 }
                             }
                         }
@@ -916,6 +995,8 @@ public:
                                     TT_Monster = glm::translate(TT_Monster, glm::vec3(-0.003, 0, 0));
                                     Monster_X -= 0.003;
                                     Bad_ending = true;
+                                    scream_Sound();
+                                    scream_background_Sound();
                                 }
                             }
                         }
@@ -945,6 +1026,8 @@ public:
                                     TT_Monster = glm::translate(TT_Monster, glm::vec3(-0.003, 0, 0));
                                     Monster_X -= 0.003;
                                     Bad_ending = true;
+                                    scream_Sound();
+                                    scream_background_Sound();
                                 }
                             }
                         }
@@ -1080,15 +1163,15 @@ GLvoid InitMonster() {
     MonsterArr[3].Monster_Z = 0.275, MonsterArr[3].MZ = 0.275;
 
     //1층
-    MonsterArr[4].Monster_X = 0.025, MonsterArr[4].MX = 0.025;
+    MonsterArr[4].Monster_X = -0.475, MonsterArr[4].MX = -0.475; 
     MonsterArr[4].Monster_Y = 0.1, MonsterArr[4].MY = 0.2;
-    MonsterArr[4].Monster_Z = -0.425, MonsterArr[4].MZ = -0.425;
+    MonsterArr[4].Monster_Z = -0.325, MonsterArr[4].MZ = -0.325;
 
     MonsterArr[5].Monster_X = -0.475, MonsterArr[5].MX = -0.475;
     MonsterArr[5].Monster_Y = 0.1, MonsterArr[5].MY = 0.2;
     MonsterArr[5].Monster_Z = 0.075, MonsterArr[5].MZ = 0.075;
 
-    MonsterArr[6].Monster_X = 0.125, MonsterArr[6].MX = 0.125;
+    MonsterArr[6].Monster_X = 0.125, MonsterArr[6].MX = 0.125; 
     MonsterArr[6].Monster_Y = 0.1, MonsterArr[6].MY = 0.2;
     MonsterArr[6].Monster_Z = 0.375, MonsterArr[6].MZ = 0.375;
      
@@ -1140,7 +1223,7 @@ GLvoid EndingBox() {
     glUniform3f(objColorLocation,1,1,1); 
 
     EndingModel = glm::mat4(1.0f);   
-    EndingModel = glm::translate(EndingModel, glm::vec3(-0.1,0.1,0));       
+    EndingModel = glm::translate(EndingModel, glm::vec3(-0.15,0.1,0));        
     EndingModel = glm::scale(EndingModel, glm::vec3(0.9, 0.1, 0.9));  
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");  
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(EndingModel));
@@ -1162,6 +1245,7 @@ GLvoid GameoverBox() {
     glUniform3f(alphaLocation, Clearness, Clearness, Clearness);
 
     BadEndingModel = glm::mat4(1.0f); 
+    BadEndingModel = glm::translate(BadEndingModel, glm::vec3(0,0.3,0));
     BadEndingModel = glm::scale(BadEndingModel, glm::vec3(1, 0.1, 1.0));  
 
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");
@@ -1328,6 +1412,8 @@ GLvoid RightLeg(int value) {
         glutTimerFunc(50, RightLeg, 0);
     }
 }
+//-----------------------------------------
+
 GLvoid myKeyBoard(unsigned char key, int x, int y) {
     switch (key) {
     case 27:
@@ -1387,6 +1473,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                 Floor_state = 1; 
                 tel_check = true;
                 Robot_Y = 0.1; 
+                Down_Sound();  
             }
         }
         else if (Floor_state == 1) {
@@ -1409,6 +1496,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             }
             if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
                 Happy_ending = true;
+                win_Sound();
             }
         }
 
@@ -1417,7 +1505,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         c2x = Robot_X, c2y = Robot_Y + 0.3, c2z = Robot_Z;
         cameraPos = glm::vec3(cx, cy, cz);
         cameraDirection = glm::vec3(c2x, c2y, c2z);
-   
+
         break;
     case 'w':
         //로봇 뒤로 걷기 
@@ -1480,6 +1568,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                 Floor_state = 1;
                 tel_check = true;
                 Robot_Y = 0.1;
+                Down_Sound();
             }
         }
         else if (Floor_state == 1) {
@@ -1502,6 +1591,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             }
             if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
                 Happy_ending = true;
+                win_Sound();
             }
         }
 
@@ -1510,6 +1600,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         c2x = Robot_X, c2y = Robot_Y + 0.3, c2z = Robot_Z;
         cameraPos = glm::vec3(cx, cy, cz);
         cameraDirection = glm::vec3(c2x, c2y, c2z);
+      
         break;
     case 'a':
         //로봇 왼쪽으로 걷기 
@@ -1575,6 +1666,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                 Floor_state = 1;
                 tel_check = true;
                 Robot_Y = 0.1;
+                Down_Sound();
             }
         }
         else if (Floor_state == 1) {
@@ -1597,6 +1689,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             }
             if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
                 Happy_ending = true;
+                win_Sound();
             }
         }
 
@@ -1605,6 +1698,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         c2x = Robot_X, c2y = Robot_Y + 0.3, c2z = Robot_Z;
         cameraPos = glm::vec3(cx, cy, cz);
         cameraDirection = glm::vec3(c2x, c2y, c2z);
+       
         break;
     case 'd':
         //로봇 오른쪽으로 걷기 
@@ -1668,7 +1762,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
                 tel_check = true;
 
                 Robot_Y = 0.1;
-
+                Down_Sound();
             }
         }
         else if (Floor_state == 1) {
@@ -1691,6 +1785,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             }
             if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
                 Happy_ending = true;
+                win_Sound();
             }
         }
 
@@ -1699,7 +1794,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
         c2x = Robot_X, c2y = Robot_Y + 0.3, c2z = Robot_Z;
         cameraPos = glm::vec3(cx, cy, cz);
         cameraDirection = glm::vec3(c2x, c2y, c2z);
-
+      
         break;
     case 'Q':
         puts("- Program End - ");
@@ -1738,9 +1833,10 @@ int main(int argc, char** argv)
     }
     else
         cout << "GLEW Initialized\n";
-
-    PlaySound(L"배경음.wav", 0, SND_FILENAME|SND_ASYNC|SND_LOOP);    
-
+ 
+ 
+  
+    background_Sound(); 
     UserFunc();
     make_vertexShaders();
     make_fragmentShaders();
