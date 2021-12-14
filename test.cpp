@@ -8,10 +8,10 @@
 #include "Mmsystem.h"
 #include "Digitalv.h"
 MCI_OPEN_PARMS m_mciOpenParms;
-MCI_PLAY_PARMS m_mciPlayParms;
-DWORD m_dwDeviceID;
-MCI_OPEN_PARMS mciOpen;
-MCI_PLAY_PARMS mciPlay;
+MCI_PLAY_PARMS m_mciPlayParms; 
+DWORD m_dwDeviceID; 
+MCI_OPEN_PARMS mciOpen; 
+MCI_PLAY_PARMS mciPlay; 
 
 int dwID;
 
@@ -29,7 +29,7 @@ GLvoid background_Sound() {
 }
 GLvoid scream_Sound() { 
 
-    mciOpen.lpstrElementName = L"비명소리.wav"; // 파일 경로 입력  
+    mciOpen.lpstrElementName = L"비명소리2.wav"; // 파일 경로 입력  
     mciOpen.lpstrDeviceType = L"mpegvideo";
 
     int Sound1 = mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
@@ -38,7 +38,7 @@ GLvoid scream_Sound() {
     dwID = mciOpen.wDeviceID;
     mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, // play & repeat   
         (DWORD)(LPVOID)&m_mciPlayParms);
-}
+} 
 GLvoid scream_background_Sound() {
     mciOpen.lpstrElementName = L"배경음악.wav"; // 파일 경로 입력  
     mciOpen.lpstrDeviceType = L"mpegvideo";
@@ -72,6 +72,17 @@ GLvoid win_Sound() {
     mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, // play & repeat   
         (DWORD)(LPVOID)&m_mciPlayParms);
 }
+GLvoid ending_Sound() {
+    mciOpen.lpstrElementName = L"엔딩.wav"; // 파일 경로 입력     
+    mciOpen.lpstrDeviceType = L"mpegvideo";
+
+    int Sound1 = mciSendCommand(NULL, MCI_OPEN, MCI_OPEN_ELEMENT | MCI_OPEN_TYPE,
+        (DWORD)(LPVOID)&mciOpen);
+
+    dwID = mciOpen.wDeviceID;
+    mciSendCommand(dwID, MCI_PLAY, MCI_NOTIFY, // play & repeat   
+        (DWORD)(LPVOID)&m_mciPlayParms);
+}
 
 int num_Triangle[2];
 objReader obj[2];
@@ -79,7 +90,8 @@ GLuint VAO[3], VBO_pos[3], VBO_normal[3], VBO_uv[3];
 
 float cx = Robot_X, cy = Robot_Y + 0.35, cz = Robot_Z + 0.000001; 
 float c2x = Robot_X, c2y = Robot_Y + 0.3, c2z = Robot_Z; 
-
+//float cx =0, cy = 10.0, cz = 0.01;
+//float c2x = 0, c2y = 0, c2z = 0;
 glm::vec3 cameraPos = glm::vec3(cx, cy, cz);
 glm::vec3 cameraDirection = glm::vec3(c2x, c2y, c2z); 
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -153,7 +165,7 @@ BB getbb_exit(float centerx, float centerz)
 
 //미로의 각 중점 구하기 
 float CubeCenterX[20][20];
-float CubeCenterZ[20][20];
+float CubeCenterZ[20][20]; 
 GLvoid GetCenterX() {
     for (int p = 0; p < 20; ++p) {
         CubeCenterX[0][p] = -0.475 + (0.05 * p);
@@ -164,7 +176,7 @@ GLvoid GetCenterX() {
             CubeCenterX[i][p] = -0.475 + (0.05 * p);
         }
     }
-} 
+}  
 GLvoid GetCenterZ() {  
     for (int i = 0; i < 20; ++i) {
         for (int p = 0; p < 20; ++p) {  
@@ -270,12 +282,12 @@ GLvoid InitTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     stbi_set_flip_vertically_on_load(true);
-    unsigned char* data8 = stbi_load("win.png", &width[7], &height[7], &nrChannels[7], 0);
+    unsigned char* data8 = stbi_load("win.JPG", &width[7], &height[7], &nrChannels[7], 0); 
     glTexImage2D(GL_TEXTURE_2D, 0, 3, width[7], height[7], 0, GL_RGB, GL_UNSIGNED_BYTE, data8); //---텍스처 이미지 정의
     glUseProgram(shaderID);
     tLocation = glGetUniformLocation(shaderID, "outTexture"); //--- outTexture 유니폼 샘플러의 위치를 가져옴 
-    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정 
-    stbi_image_free(data8); 
+    glUniform1i(tLocation, 0); //--- 샘플러를 0번 유닛으로 설정  
+    stbi_image_free(data8);  
     //--------------------------------------------------------------------------
     glGenTextures(1, &texture[8]); //--- 텍스처 생성
     glBindTexture(GL_TEXTURE_2D, texture[8]); //--- 텍스처 바인딩 
@@ -436,7 +448,7 @@ GLvoid Mountins(int i, int p) {
     glUseProgram(shaderID);
     glBindVertexArray(VAO[0]);
     InitLight();
-    glUniform3f(objColorLocation,0.5,0.3,0.4);
+    glUniform3f(objColorLocation,0.5,0.6,0.7);
 
     MiroModel = glm::mat4(1.0f);
     MiroModel = glm::translate(MiroModel, glm::vec3(MDataArr[i][p].x, 0.3, MDataArr[i][p].z));
@@ -1137,12 +1149,12 @@ public:
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 };
-Monster_info MonsterArr[8];
+Monster_info MonsterArr[16];
 GLvoid InitMonster() {
-    for (int i = 0; i < 4; ++i) {  
+    for (int i = 0; i < 8; ++i) {  
         MonsterArr[i].floor = 2; 
     }
-    for (int i = 4; i < 8; ++i) {
+    for (int i = 8; i < 16; ++i) {
         MonsterArr[i].floor = 1;
     }
     //2층
@@ -1162,23 +1174,56 @@ GLvoid InitMonster() {
     MonsterArr[3].Monster_Y = 0.52, MonsterArr[3].MY = 0.52;
     MonsterArr[3].Monster_Z = 0.275, MonsterArr[3].MZ = 0.275;
 
+
+    MonsterArr[4].Monster_X = -0.475, MonsterArr[4].MX = -0.475;
+    MonsterArr[4].Monster_Y = 0.52, MonsterArr[4].MY = 0.52;
+    MonsterArr[4].Monster_Z = -0.475, MonsterArr[4].MZ = -0.475;
+
+    MonsterArr[5].Monster_X = 0.025, MonsterArr[5].MX = 0.025;
+    MonsterArr[5].Monster_Y = 0.52, MonsterArr[5].MY = 0.52;
+    MonsterArr[5].Monster_Z = -0.475, MonsterArr[5].MZ = -0.475;
+
+    MonsterArr[6].Monster_X = -0.325, MonsterArr[6].MX = -0.325;
+    MonsterArr[6].Monster_Y = 0.52, MonsterArr[6].MY = 0.52;
+    MonsterArr[6].Monster_Z = 0.175, MonsterArr[6].MZ = 0.175;
+
+    MonsterArr[7].Monster_X = 0.275, MonsterArr[7].MX = 0.275;
+    MonsterArr[7].Monster_Y = 0.52, MonsterArr[7].MY = 0.52;
+    MonsterArr[7].Monster_Z = 0.225, MonsterArr[7].MZ = 0.225;
+
     //1층
-    MonsterArr[4].Monster_X = -0.475, MonsterArr[4].MX = -0.475; 
-    MonsterArr[4].Monster_Y = 0.1, MonsterArr[4].MY = 0.2;
-    MonsterArr[4].Monster_Z = -0.325, MonsterArr[4].MZ = -0.325;
-
-    MonsterArr[5].Monster_X = -0.475, MonsterArr[5].MX = -0.475;
-    MonsterArr[5].Monster_Y = 0.1, MonsterArr[5].MY = 0.2;
-    MonsterArr[5].Monster_Z = 0.075, MonsterArr[5].MZ = 0.075;
-
-    MonsterArr[6].Monster_X = 0.125, MonsterArr[6].MX = 0.125; 
-    MonsterArr[6].Monster_Y = 0.1, MonsterArr[6].MY = 0.2;
-    MonsterArr[6].Monster_Z = 0.375, MonsterArr[6].MZ = 0.375;
-     
-    MonsterArr[7].Monster_X = 0.375, MonsterArr[7].MX = 0.375; 
-    MonsterArr[7].Monster_Y = 0.1, MonsterArr[7].MY = 0.2; 
-    MonsterArr[7].Monster_Z = 0.125, MonsterArr[7].MZ = 0.125; 
+    MonsterArr[8].Monster_X = 0.375, MonsterArr[8].MX = 0.375; 
+    MonsterArr[8].Monster_Y = 0.2, MonsterArr[8].MY = 0.2; 
+    MonsterArr[8].Monster_Z = 0.125, MonsterArr[8].MZ = 0.125; 
   
+    MonsterArr[9].Monster_X = -0.475, MonsterArr[9].MX = -0.475;
+    MonsterArr[9].Monster_Y = 0.2, MonsterArr[9].MY = 0.2;
+    MonsterArr[9].Monster_Z = -0.325, MonsterArr[9].MZ = -0.325;
+
+    MonsterArr[10].Monster_X = -0.475, MonsterArr[10].MX = -0.475;
+    MonsterArr[10].Monster_Y = 0.2, MonsterArr[10].MY = 0.2;
+    MonsterArr[10].Monster_Z = 0.075, MonsterArr[10].MZ = 0.075;
+
+    MonsterArr[11].Monster_X = 0.125, MonsterArr[11].MX = 0.125;
+    MonsterArr[11].Monster_Y = 0.2, MonsterArr[11].MY = 0.2;
+    MonsterArr[11].Monster_Z = 0.375, MonsterArr[11].MZ = 0.375;
+
+    MonsterArr[12].Monster_X = -0.075, MonsterArr[12].MX = -0.075;
+    MonsterArr[12].Monster_Y = 0.2, MonsterArr[12].MY = 0.2;
+    MonsterArr[12].Monster_Z = -0.325, MonsterArr[12].MZ = -0.325;
+
+    MonsterArr[13].Monster_X = -0.175, MonsterArr[13].MX = -0.175;
+    MonsterArr[13].Monster_Y = 0.2, MonsterArr[13].MY = 0.2;
+    MonsterArr[13].Monster_Z = 0.425, MonsterArr[13].MZ = 0.425;
+
+    MonsterArr[14].Monster_X = 0.125, MonsterArr[14].MX = 0.125;
+    MonsterArr[14].Monster_Y = 0.2, MonsterArr[14].MY = 0.2;
+    MonsterArr[14].Monster_Z = 0.175, MonsterArr[14].MZ = 0.175; 
+
+    MonsterArr[15].Monster_X = 0.275, MonsterArr[15].MX = 0.275;
+    MonsterArr[15].Monster_Y = 0.2, MonsterArr[15].MY = 0.2;
+    MonsterArr[15].Monster_Z = -0.375, MonsterArr[15].MZ = -0.375;
+
 }
 GLvoid Teleport() {
     glUseProgram(shaderID);
@@ -1223,7 +1268,7 @@ GLvoid EndingBox() {
     glUniform3f(objColorLocation,1,1,1); 
 
     EndingModel = glm::mat4(1.0f);   
-    EndingModel = glm::translate(EndingModel, glm::vec3(-0.15,0.1,0));        
+    EndingModel = glm::translate(EndingModel, glm::vec3(-0.12,0.1,0));        
     EndingModel = glm::scale(EndingModel, glm::vec3(0.9, 0.1, 0.9));  
     modelLocation = glGetUniformLocation(shaderID, "modelTransform");  
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(EndingModel));
@@ -1256,7 +1301,7 @@ GLvoid GameoverBox() {
     glDrawArrays(GL_TRIANGLES,24,6);   
 }
 GLvoid Move(int value) {
-    for (int i = 0; i < 8; ++i) { 
+    for (int i = 0; i < 16; ++i) {  
         MonsterArr[i].MonsterMoving();
     }
     glutTimerFunc(30, Move, 0);
@@ -1271,7 +1316,7 @@ GLvoid drawScene()
     glDepthFunc(GL_LEQUAL);
 
     Pro();
-    View();
+    View(); 
   
     if (Bad_ending == false && Happy_ending == false) {
         Wall();
@@ -1286,7 +1331,7 @@ GLvoid drawScene()
                 }
             }
             Teleport();
-            for (int i = 0; i < 4; ++i) {
+            for (int i = 0; i < 8; ++i) {
                 MonsterArr[i].DrawMonster();
             }
         }
@@ -1300,7 +1345,7 @@ GLvoid drawScene()
                 }
             }
             ExitBox();
-            for (int i = 4; i < 8; ++i) {
+            for (int i = 8; i < 16; ++i) {
                 MonsterArr[i].DrawMonster();
             }
         }
@@ -1315,6 +1360,8 @@ GLvoid drawScene()
         EndingBox();
         happy_check = true;
     }
+   
+  
     glutPostRedisplay();
     glutSwapBuffers();
 }
@@ -1497,6 +1544,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
                 Happy_ending = true;
                 win_Sound();
+                ending_Sound();
             }
         }
 
@@ -1592,6 +1640,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
                 Happy_ending = true;
                 win_Sound();
+                ending_Sound();
             }
         }
 
@@ -1690,6 +1739,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
                 Happy_ending = true;
                 win_Sound();
+                ending_Sound();
             }
         }
 
@@ -1786,6 +1836,7 @@ GLvoid myKeyBoard(unsigned char key, int x, int y) {
             if (Collide(getbb_robot(Robot_X, Robot_Z), getbb_cube(box_x, box_z)) == true) {
                 Happy_ending = true;
                 win_Sound();
+                ending_Sound();
             }
         }
 
@@ -1833,9 +1884,7 @@ int main(int argc, char** argv)
     }
     else
         cout << "GLEW Initialized\n";
- 
- 
-  
+
     background_Sound(); 
     UserFunc();
     make_vertexShaders();
@@ -1860,4 +1909,13 @@ int main(int argc, char** argv)
    
 
     glutMainLoop();
+
+    for (int i = 0; i < 20; i++) {
+        delete MDataArr[i];
+    }
+    for (int i = 0; i < 20; i++) {
+        delete MDataArr2[i];
+    }
+    delete[] MDataArr;  
+    delete[] MDataArr2; 
 }
