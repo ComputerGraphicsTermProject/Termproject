@@ -1309,7 +1309,6 @@ GLvoid drawScene()
         GameoverBox();
         over_check = true;
     }
-
     if (Happy_ending) {
         EndingBox();
         happy_check = true;
